@@ -12,6 +12,8 @@ import { DamageReport } from './components/DamageReport'; // New import
 import { EmergencyButton } from './components/EmergencyButton'; // New import
 import { SupportDialog } from './components/SupportDialog'; // New import
 import HostVehicleForm from './components/HostVehicleForm'; // New import
+import AdminLogin from './components/AdminLogin'; // New import
+import AdminDashboard from './components/AdminDashboard'; // New import
 import { Toaster } from 'sonner'; // Ensure sonner is installed or handle if missing
 
 const App = () => {
@@ -63,6 +65,18 @@ const App = () => {
     handleNavigate('dashboard'); // Redirect to dashboard to see the booking
   };
 
+  const handleUpdateBooking = (updatedBooking) => {
+    setUserBookings(prev => prev.map(b =>
+      b.id === updatedBooking.id ? { ...b, ...updatedBooking } : b
+    ));
+    // Ideally toast notification here
+  };
+
+  const handleCancelBooking = (bookingId) => {
+    setUserBookings(prev => prev.filter(b => b.id !== bookingId));
+    // Toast notification could be triggered here or in Dashboard
+  };
+
   const handleEmergency = () => {
     setSupportTab('emergency');
     setIsSupportOpen(true);
@@ -76,13 +90,15 @@ const App = () => {
       <main className="min-h-screen pt-4">
         {currentView === 'home' && (
           <>
-            <Hero onSearch={() => handleNavigate('vehicles')} />
-            <Features />
+            <>
+              <Hero onSearch={() => handleNavigate('vehicles')} onNavigate={handleNavigate} />
+              <Features />
+            </>
           </>
         )}
 
         {currentView === 'vehicles' && (
-          <VehicleList onBook={handleBookVehicle} />
+          <VehicleList onBook={handleBookVehicle} user={user} />
         )}
 
         {currentView === 'booking' && selectedVehicle && (
@@ -111,7 +127,11 @@ const App = () => {
         {currentView === 'privacy' && <Privacy />}
         {currentView === 'contact' && <Contact />}
         {currentView === 'login' && <Login onNavigate={handleNavigate} onLogin={handleLogin} />}
-        {currentView === 'dashboard' && <Dashboard onNavigate={handleNavigate} bookings={userBookings} user={user} />}
+        {currentView === 'dashboard' && <Dashboard onNavigate={handleNavigate} bookings={userBookings} user={user} onUpdateBooking={handleUpdateBooking} onCancelBooking={handleCancelBooking} />}
+
+        {/* Admin Routes */}
+        {currentView === 'admin-login' && <AdminLogin onNavigate={handleNavigate} onLogin={handleLogin} />}
+        {currentView === 'admin-dashboard' && <AdminDashboard onNavigate={handleNavigate} />}
 
       </main>
 
@@ -122,6 +142,7 @@ const App = () => {
         open={isSupportOpen}
         onOpenChange={setIsSupportOpen}
         defaultTab={supportTab}
+        user={user}
       />
 
       <Footer onNavigate={handleNavigate} />

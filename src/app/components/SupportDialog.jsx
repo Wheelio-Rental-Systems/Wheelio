@@ -8,7 +8,10 @@ import {
     ChevronRight,
     Send,
     LifeBuoy,
-    MapPin
+    MapPin,
+    Upload,
+    Camera,
+    X
 } from "lucide-react";
 import {
     Dialog,
@@ -30,29 +33,82 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
 
-export function SupportDialog({ open, onOpenChange, defaultTab = "faq" }) {
-    const [activeTab, setActiveTab] = useState(defaultTab);
+export function SupportDialog({ open, onOpenChange, defaultTab = "emergency", user }) {
+    const [activeTab, setActiveTab] = useState("emergency"); // Default to emergency/damage
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Sync internal state if prop changes (optional interaction pattern)
-    // functionality handled by Tabs defaultValue usually, but if opened dynamically to specific tab:
-    if (open && activeTab !== defaultTab && defaultTab !== "faq") {
-        // This is a simplification; in a real app we'd use useEffect or just let the parent control
-    }
+    // Damage Report State
+    const [damageForm, setDamageForm] = useState({
+        location: '',
+        severity: 'minor',
+        description: '',
+        vehiclePhotos: []
+    });
 
-    const handleContactSubmit = (e) => {
+    const handleFileChange = (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+            // Convert to Base64 for local storage demo
+            const files = Array.from(e.target.files);
+            Promise.all(files.map(file => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                });
+            })).then(base64Images => {
+                setDamageForm(prev => ({
+                    ...prev,
+                    vehiclePhotos: [...prev.vehiclePhotos, ...base64Images]
+                }));
+            });
+        }
+    };
+
+    const removePhoto = (index) => {
+        setDamageForm(prev => ({
+            ...prev,
+            vehiclePhotos: prev.vehiclePhotos.filter((_, i) => i !== index)
+        }));
+    };
+
+    const handleDamageSubmit = (e) => {
         e.preventDefault();
+        if (!user) {
+            toast.error("Authentication Required", { description: "Please login to submit a damage report." });
+            return;
+        }
+
         setIsSubmitting(true);
+
+        const newReport = {
+            id: 'DMG' + Date.now(),
+            userId: user.email || 'unknown',
+            userName: user.name || 'User',
+            ...damageForm,
+            status: 'Pending', // Pending, Reviewed, Cost Estimated
+            estimatedCost: 0,
+            submittedAt: new Date().toISOString()
+        };
+
+        const existingReports = JSON.parse(localStorage.getItem('damageReports') || '[]');
+        localStorage.setItem('damageReports', JSON.stringify([newReport, ...existingReports]));
+
         setTimeout(() => {
             setIsSubmitting(false);
-            toast.success("Message sent successfully", {
-                description: "Our support team will get back to you within 24 hours."
+            toast.success("Damage Report Submitted", {
+                description: "Our admin team will review the damage and send a cost estimation shortly."
             });
+            setDamageForm({ location: '', severity: 'minor', description: '', vehiclePhotos: [] });
             onOpenChange(false);
         }, 1500);
     };
 
-    const handleEmergencyReport = () => {
+    const handleEmergencyAlert = () => {
+        if (!user) {
+            toast.error("Authentication Required", { description: "Please login to use emergency features." });
+            return;
+        }
         setIsSubmitting(true);
         setTimeout(() => {
             setIsSubmitting(false);
@@ -76,149 +132,163 @@ export function SupportDialog({ open, onOpenChange, defaultTab = "faq" }) {
                     </DialogDescription>
                 </DialogHeader>
 
-                <Tabs defaultValue={defaultTab} className="w-full">
-                    <div className="px-6">
-                        <TabsList className="grid w-full grid-cols-3 bg-secondary/50">
-                            <TabsTrigger value="faq">FAQ</TabsTrigger>
-                            <TabsTrigger value="contact">Contact Us</TabsTrigger>
+                <div className="p-6 pt-4">
+                    <Tabs defaultValue="damage" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 bg-secondary/50 mb-6">
+                            <TabsTrigger value="damage" className="data-[state=active]:bg-primary data-[state=active]:text-black">
+                                Report Damage
+                            </TabsTrigger>
                             <TabsTrigger value="emergency" className="data-[state=active]:bg-destructive data-[state=active]:text-white text-destructive hover:text-destructive/80">
-                                Emergency
+                                Emergency Contacts
                             </TabsTrigger>
                         </TabsList>
-                    </div>
 
-                    {/* FAQ TAB */}
-                    <TabsContent value="faq" className="p-6 space-y-4 pt-4">
-                        <div className="space-y-1">
-                            <h3 className="font-semibold text-lg">Frequently Asked Questions</h3>
-                            <p className="text-sm text-muted-foreground">Quick answers to common questions</p>
-                        </div>
-
-                        <Accordion type="single" collapsible className="w-full">
-                            <AccordionItem value="item-1" className="border-white/5">
-                                <AccordionTrigger>What documents do I need to rent a vehicle?</AccordionTrigger>
-                                <AccordionContent className="text-muted-foreground">
-                                    You need a valid driver's license, an ID proof (Aadhar/Passport), and a credit/debit card for the security deposit. International renters need an International Driving Permit (IDP).
-                                </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="item-2" className="border-white/5">
-                                <AccordionTrigger>Is fuel included in the rental price?</AccordionTrigger>
-                                <AccordionContent className="text-muted-foreground">
-                                    No, fuel is not included. The vehicle is provided with a full tank and should be returned with a full tank. Alternatively, you can pay for the missing fuel plus a refueling charge.
-                                </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="item-3" className="border-white/5">
-                                <AccordionTrigger>What is the cancellation policy?</AccordionTrigger>
-                                <AccordionContent className="text-muted-foreground">
-                                    You can cancel for free up to 24 hours before your pickup time. Cancellations made within 24 hours incur a 50% fee. No-shows are charged 100%.
-                                </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="item-4" className="border-white/5">
-                                <AccordionTrigger>Is there a security deposit?</AccordionTrigger>
-                                <AccordionContent className="text-muted-foreground">
-                                    Yes, a refundable security deposit of ₹500 is charged at the time of booking. It is refunded within 3-5 business days after the vehicle is returned damage-free.
-                                </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="item-5" className="border-white/5">
-                                <AccordionTrigger>What happens if the vehicle breaks down?</AccordionTrigger>
-                                <AccordionContent className="text-muted-foreground">
-                                    We offer 24/7 roadside assistance. In case of a breakdown, contact us immediately via the "Emergency" tab or call our support line. We will provide a replacement vehicle or arrange repairs.
-                                </AccordionContent>
-                            </AccordionItem>
-                        </Accordion>
-                    </TabsContent>
-
-                    {/* CONTACT TAB */}
-                    <TabsContent value="contact" className="p-6 space-y-4 pt-4">
-                        <div className="space-y-1">
-                            <h3 className="font-semibold text-lg">Send us a message</h3>
-                            <p className="text-sm text-muted-foreground">We usually respond within a few hours</p>
-                        </div>
-
-                        <form onSubmit={handleContactSubmit} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="subject">Subject</Label>
-                                <Input id="subject" placeholder="e.g., Booking modification Request" className="bg-secondary/30 border-white/10" required />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="message">Message</Label>
-                                <Textarea
-                                    id="message"
-                                    placeholder="Describe your issue or query..."
-                                    className="bg-secondary/30 border-white/10 min-h-[150px]"
-                                    required
-                                />
-                            </div>
-
-                            <div className="pt-2">
-                                <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isSubmitting}>
-                                    {isSubmitting ? (
-                                        "Sending..."
-                                    ) : (
-                                        <>
-                                            <Send className="mr-2 h-4 w-4" /> Send Message
-                                        </>
-                                    )}
-                                </Button>
-                            </div>
-
-                            <div className="mt-4 p-4 rounded-lg bg-secondary/30 border border-white/5 flex flex-col gap-4">
-                                <div className="flex items-start gap-3 text-muted-foreground">
-                                    <MapPin className="h-5 w-5 text-primary shrink-0" />
-                                    <span>123 Mobility Lane, Tech District,<br />Coimbatore, Tamilnadu 641004</span>
+                        {/* DAMAGE REPORT TAB */}
+                        <TabsContent value="damage" className="space-y-4">
+                            {!user ? (
+                                <div className="text-center py-10 space-y-4">
+                                    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto">
+                                        <AlertTriangle className="h-8 w-8 text-yellow-500" />
+                                    </div>
+                                    <h3 className="font-bold text-lg">Authentication Required</h3>
+                                    <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+                                        You must be logged in to report vehicle damage. Please sign in to verify your identity.
+                                    </p>
                                 </div>
-                                <div className="flex items-center gap-3 text-muted-foreground">
-                                    <Phone className="h-5 w-5 text-primary shrink-0" />
-                                    <div>
-                                        <p className="text-sm font-medium text-foreground">Customer Care</p>
-                                        <p className="text-sm">+91 95858 99711</p>
+                            ) : (
+                                <form onSubmit={handleDamageSubmit} className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                                    <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex gap-3 items-start">
+                                        <AlertTriangle className="h-5 w-5 text-yellow-500 shrink-0 mt-0.5" />
+                                        <div className="text-sm text-yellow-500/90">
+                                            Please provide accurate details about the incident. This helps us process insurance claims and repairs faster.
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="location">Incident Location</Label>
+                                        <div className="relative">
+                                            <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                id="location"
+                                                placeholder="Enter location where damage occurred"
+                                                className="pl-10 bg-secondary/30 border-white/10"
+                                                value={damageForm.location}
+                                                onChange={(e) => setDamageForm({ ...damageForm, location: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="severity">Severity Level</Label>
+                                        <select
+                                            id="severity"
+                                            className="flex h-10 w-full rounded-md border border-white/10 bg-secondary/30 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary"
+                                            value={damageForm.severity}
+                                            onChange={(e) => setDamageForm({ ...damageForm, severity: e.target.value })}
+                                        >
+                                            <option value="minor">Minor (Scratches, minor dents)</option>
+                                            <option value="moderate">Moderate (Broken lights, visible dents)</option>
+                                            <option value="severe">Severe (Engine failure, major accident)</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="description">Situation Description</Label>
+                                        <Textarea
+                                            id="description"
+                                            placeholder="Explain how the damage happened..."
+                                            className="bg-secondary/30 border-white/10 min-h-[100px]"
+                                            value={damageForm.description}
+                                            onChange={(e) => setDamageForm({ ...damageForm, description: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <Label>Damage Photos (Required)</Label>
+                                        <div className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center hover:border-primary/50 transition-colors bg-white/5 cursor-pointer relative">
+                                            <input
+                                                type="file"
+                                                multiple
+                                                accept="image/*"
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                onChange={handleFileChange}
+                                            />
+                                            <Camera className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                                            <p className="text-sm text-muted-foreground">Click to upload photos</p>
+                                        </div>
+
+                                        {damageForm.vehiclePhotos.length > 0 && (
+                                            <div className="flex gap-2 overflow-x-auto pb-2">
+                                                {damageForm.vehiclePhotos.map((photo, split) => (
+                                                    <div key={split} className="relative shrink-0 group">
+                                                        <img src={photo} alt="damage" className="h-20 w-20 object-cover rounded-lg border border-white/10" />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removePhoto(split)}
+                                                            className="absolute -top-1 -right-1 bg-red-500 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        >
+                                                            <X className="h-3 w-3 text-white" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <Button
+                                        type="submit"
+                                        className="w-full bg-primary hover:bg-primary/90 mt-2"
+                                        disabled={isSubmitting || damageForm.vehiclePhotos.length === 0}
+                                    >
+                                        {isSubmitting ? "Submitting Report..." : "Submit Damage Report"}
+                                    </Button>
+                                </form>
+                            )}
+                        </TabsContent>
+
+                        {/* EMERGENCY CONTACTS TAB */}
+                        <TabsContent value="emergency" className="space-y-6 animate-in fade-in slide-in-from-right">
+                            <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex gap-4">
+                                <AlertTriangle className="h-6 w-6 text-destructive shrink-0 mt-1" />
+                                <div>
+                                    <h3 className="font-bold text-destructive">Emergency Assistance</h3>
+                                    <p className="text-sm text-destructive/80">
+                                        Only use this section for urgent situations like accidents, theft, or severe breakdowns requiring immediate attention.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="grid gap-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2 border-destructive/20 hover:bg-destructive/10 hover:text-destructive hover:border-destructive">
+                                        <ShieldAlert className="h-8 w-8" />
+                                        <span className="font-semibold">Police</span>
+                                    </Button>
+                                    <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2 border-destructive/20 hover:bg-destructive/10 hover:text-destructive hover:border-destructive">
+                                        <LifeBuoy className="h-8 w-8" />
+                                        <span className="font-semibold">Ambulance</span>
+                                    </Button>
+                                </div>
+
+                                <Button onClick={handleEmergencyAlert} className="h-16 w-full text-lg bg-destructive hover:bg-destructive/90 animate-pulse font-bold">
+                                    {isSubmitting ? "Sending Alert..." : "REPORT EMERGENCY & SHARE LOCATION"}
+                                </Button>
+
+                                <div className="text-center">
+                                    <p className="text-xs text-muted-foreground mb-4">
+                                        Pressing this will share your live coordinates with our safety team and local authorities.
+                                    </p>
+                                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-secondary/30 py-2 rounded-full">
+                                        <MapPin className="h-4 w-4" />
+                                        <span>Your Location: Detecting... (Enable GPS)</span>
                                     </div>
                                 </div>
                             </div>
-                        </form>
-                    </TabsContent>
-
-                    {/* EMERGENCY TAB */}
-                    <TabsContent value="emergency" className="p-6 space-y-6 pt-4">
-                        <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex gap-4">
-                            <AlertTriangle className="h-6 w-6 text-destructive shrink-0 mt-1" />
-                            <div>
-                                <h3 className="font-bold text-destructive">Emergency Assistance</h3>
-                                <p className="text-sm text-destructive/80">
-                                    Only use this section for urgent situations like accidents, theft, or severe breakdowns requiring immediate attention.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="grid gap-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2 border-destructive/20 hover:bg-destructive/10 hover:text-destructive hover:border-destructive">
-                                    <ShieldAlert className="h-8 w-8" />
-                                    <span className="font-semibold">Police</span>
-                                </Button>
-                                <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2 border-destructive/20 hover:bg-destructive/10 hover:text-destructive hover:border-destructive">
-                                    <LifeBuoy className="h-8 w-8" />
-                                    <span className="font-semibold">Ambulance</span>
-                                </Button>
-                            </div>
-
-                            <Button onClick={handleEmergencyReport} className="h-16 w-full text-lg bg-destructive hover:bg-destructive/90 animate-pulse font-bold">
-                                {isSubmitting ? "Sending Alert..." : "REPORT EMERGENCY & SHARE LOCATION"}
-                            </Button>
-
-                            <div className="text-center">
-                                <p className="text-xs text-muted-foreground mb-4">
-                                    Pressing this will share your live coordinates with our safety team and local authorities.
-                                </p>
-                                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-secondary/30 py-2 rounded-full">
-                                    <MapPin className="h-4 w-4" />
-                                    <span>Your Location: Detecting... (Enable GPS)</span>
-                                </div>
-                            </div>
-                        </div>
-                    </TabsContent>
-                </Tabs>
+                        </TabsContent>
+                    </Tabs>
+                </div>
             </DialogContent>
         </Dialog>
     );

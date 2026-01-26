@@ -13,8 +13,19 @@ export function VehicleDetailsDialog({
 }) {
   const [activeTab, setActiveTab] = useState('specifications');
   const [rentalDays, setRentalDays] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  // Sync selected image when vehicle changes
+  React.useEffect(() => {
+    if (vehicle) {
+      setSelectedImage(vehicle.image);
+    }
+  }, [vehicle]);
 
   if (!vehicle || !open) return null;
+
+  // Use defined gallery images or fallback to duplicates of main image for UI consistency
+  const galleryImages = vehicle.images || [vehicle.image, vehicle.image, vehicle.image, vehicle.image];
 
   // Calculate costs
   const baseRate = vehicle.price;
@@ -128,7 +139,7 @@ export function VehicleDetailsDialog({
           {/* Main Image */}
           <div className="relative aspect-video rounded-2xl overflow-hidden mb-4 group">
             <img
-              src={vehicle.image}
+              src={selectedImage || vehicle.image}
               alt={vehicle.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
@@ -141,9 +152,13 @@ export function VehicleDetailsDialog({
 
           {/* Thumbnails */}
           <div className="grid grid-cols-4 gap-3 mb-8">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className={`aspect-video rounded-lg overflow-hidden border-2 cursor-pointer ${i === 1 ? 'border-primary' : 'border-transparent opacity-60 hover:opacity-100'}`}>
-                <img src={vehicle.image} className="w-full h-full object-cover" />
+            {galleryImages.slice(0, 4).map((img, i) => (
+              <div
+                key={i}
+                onClick={() => setSelectedImage(img)}
+                className={`aspect-video rounded-lg overflow-hidden border-2 cursor-pointer transition-all ${selectedImage === img ? 'border-primary ring-2 ring-primary/20' : 'border-transparent opacity-60 hover:opacity-100 hover:border-white/20'}`}
+              >
+                <img src={img} className="w-full h-full object-cover" alt={`View ${i + 1}`} />
               </div>
             ))}
           </div>

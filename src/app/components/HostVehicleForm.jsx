@@ -12,7 +12,8 @@ const HostVehicleForm = () => {
         fuelType: 'Petrol',
         location: '',
         license: null,
-        rcBook: null
+        rcBook: null,
+        vehiclePhotos: []
     });
 
     const handleInputChange = (e) => {
@@ -20,21 +21,60 @@ const HostVehicleForm = () => {
     };
 
     const handleFileChange = (e, field) => {
-        if (e.target.files[0]) {
+        if (field === 'vehiclePhotos') {
+            if (e.target.files && e.target.files.length > 0) {
+                setFormData({ ...formData, [field]: Array.from(e.target.files) });
+            }
+        } else if (e.target.files[0]) {
             setFormData({ ...formData, [field]: e.target.files[0] });
         }
     };
 
-    const handleSubmit = (e) => {
+    const convertToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = (error) => reject(error);
+        });
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
 
-        // Mock API call
-        setTimeout(() => {
+        try {
+            // Convert files to Base64
+            const licenseBase64 = formData.license ? await convertToBase64(formData.license) : null;
+            const rcBookBase64 = formData.rcBook ? await convertToBase64(formData.rcBook) : null;
+            const vehiclePhotosBase64 = await Promise.all(
+                (formData.vehiclePhotos || []).map(file => convertToBase64(file))
+            );
+
+            const newRequest = {
+                id: 'HOST' + Date.now(),
+                ...formData,
+                license: licenseBase64, // Store base64 string
+                rcBook: rcBookBase64,   // Store base64 string
+                vehiclePhotos: vehiclePhotosBase64, // Store array of base64 strings
+                status: 'Pending',
+                submittedAt: new Date().toISOString()
+            };
+
+            // Save to localStorage
+            const existingRequests = JSON.parse(localStorage.getItem('hostRequests') || '[]');
+            localStorage.setItem('hostRequests', JSON.stringify([newRequest, ...existingRequests]));
+
+            setTimeout(() => {
+                setIsSubmitting(false);
+                setStep('success');
+                toast.success("Vehicle Listed Successfully!");
+            }, 1000);
+        } catch (error) {
+            console.error("Error submitting form:", error);
+            toast.error("Failed to submit. Please try again.");
             setIsSubmitting(false);
-            setStep('success');
-            toast.success("Vehicle Listed Successfully!");
-        }, 2000);
+        }
     };
 
     return (
@@ -146,6 +186,30 @@ const HostVehicleForm = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Vehicle Photos */}
+                            <div className="border-2 border-dashed border-white/10 rounded-xl p-6 hover:border-primary/50 transition-colors bg-white/5 group relative md:col-span-2">
+                                <h4 className="text-sm font-medium text-gray-400 mb-2">Vehicle Photos (Upload Multiple)</h4>
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                    onChange={(e) => handleFileChange(e, 'vehiclePhotos')}
+                                />
+                                <div className="flex flex-col items-center justify-center py-4">
+                                    {formData.vehiclePhotos && formData.vehiclePhotos.length > 0 ? (
+                                        <div className="text-green-500 flex items-center gap-2 font-bold">
+                                            <CheckCircle size={20} /> {formData.vehiclePhotos.length} Photos Selected
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <Upload className="mb-2 text-gray-500 group-hover:text-primary transition-colors" />
+                                            <span className="text-xs text-gray-500">Click to upload multiple photos</span>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
                         {/* Section 3: Location */}
@@ -180,7 +244,7 @@ const HostVehicleForm = () => {
                         </div>
 
                     </form>
-                </div>
+                </div >
             ) : (
                 <div className="bg-secondary/20 border border-white/5 rounded-3xl p-16 text-center animate-in zoom-in duration-500">
                     <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center text-black mx-auto mb-8 shadow-[0_0_30px_rgba(34,197,94,0.3)]">
@@ -198,7 +262,7 @@ const HostVehicleForm = () => {
                     </button>
                 </div>
             )}
-        </div>
+        </div >
     );
 };
 

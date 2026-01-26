@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { Calendar, Clock, ArrowLeft, ShieldCheck, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
@@ -143,6 +143,7 @@ const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
                                         type="date"
                                         name="startDate"
                                         required
+                                        min={new Date().toISOString().split('T')[0]}
                                         className="w-full bg-background border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white focus:ring-2 focus:ring-primary/50 outline-none [color-scheme:dark]"
                                         onChange={handleChange}
                                     />
@@ -156,6 +157,7 @@ const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
                                         type="date"
                                         name="endDate"
                                         required
+                                        min={formData.startDate || new Date().toISOString().split('T')[0]}
                                         className="w-full bg-background border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white focus:ring-2 focus:ring-primary/50 outline-none [color-scheme:dark]"
                                         onChange={handleChange}
                                     />
@@ -177,6 +179,21 @@ const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
                                     />
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Pickup Location Display */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-300">Pickup Location</label>
+                            <div className="relative">
+                                <MapPin className="absolute left-3 top-3.5 text-primary w-4 h-4" />
+                                <input
+                                    type="text"
+                                    value={vehicle.location || 'Coimbatore'}
+                                    readOnly
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-gray-300 cursor-not-allowed focus:outline-none"
+                                />
+                            </div>
+                            <p className="text-xs text-gray-500">Pick up your vehicle from this location</p>
                         </div>
 
                         <div className="space-y-4">

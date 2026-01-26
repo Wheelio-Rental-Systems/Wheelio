@@ -1,99 +1,83 @@
 import React, { useState } from 'react';
-import { Search, Calendar, MapPin, Clock } from 'lucide-react';
+import { Search, Calendar, MapPin, Clock, Car, Bike, ArrowRight } from 'lucide-react';
 
-const Hero = ({ onSearch }) => {
-  const [activeTab, setActiveTab] = useState('cars'); // 'cars' or 'bikes'
-
+const Hero = ({ onNavigate }) => {
   return (
     <div className="relative w-full min-h-[85vh] flex items-center justify-center overflow-hidden bg-background">
-      {/* Background Glow Effects */}
-      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none" />
+      {/* Background Glow Effects - Enhanced */}
+      <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-primary/10 rounded-full blur-[140px] pointer-events-none mix-blend-screen animate-pulse" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[800px] h-[800px] bg-purple-600/10 rounded-full blur-[140px] pointer-events-none mix-blend-screen animate-pulse delay-1000" />
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
 
         {/* Heading */}
-        <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight tracking-tight animate-in fade-in slide-in-from-bottom-8 duration-700">
-          Find Your <span className="text-primary italic">Perfect Ride</span>
+        <h1 className="text-5xl md:text-8xl font-black text-white mb-8 leading-tight tracking-tighter animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          Find Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-300 italic pr-2">Perfect Ride</span>
         </h1>
-        <p className="text-gray-400 text-lg md:text-xl max-w-2xl mb-12 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
-          Premium vehicle rentals for every journey. Choose from our wide range of luxury cars and sport bikes.
+        <p className="text-gray-400 text-lg md:text-2xl max-w-3xl mb-16 font-light animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 leading-relaxed">
+          Premium vehicle rentals for every journey. <br className="hidden md:block" />Choose from our exclusive fleet of luxury cars and sport bikes.
         </p>
 
-        {/* Search Container */}
-        <div className="w-full max-w-4xl bg-card border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl shadow-black/50 backdrop-blur-sm animate-in zoom-in duration-500 delay-200">
+        {/* Search Container - Glassmorphism & Premium Look */}
+        <div className="relative group w-full max-w-5xl">
+          {/* Glow behind container */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-600/20 rounded-[2.5rem] blur-xl group-hover:blur-2xl transition-all duration-500 opacity-60"></div>
 
-          {/* Tabs */}
-          <div className="flex space-x-4 mb-8">
-            <button
-              onClick={() => setActiveTab('cars')}
-              className={`px-8 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${activeTab === 'cars'
-                  ? 'bg-primary text-black shadow-lg shadow-primary/25 scale-105'
-                  : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
-                }`}
-            >
-              Cars
-            </button>
-            <button
-              onClick={() => setActiveTab('bikes')}
-              className={`px-8 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${activeTab === 'bikes'
-                  ? 'bg-primary text-black shadow-lg shadow-primary/25 scale-105'
-                  : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
-                }`}
-            >
-              Bikes
-            </button>
-          </div>
+          <div className="relative bg-black/40 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-8 md:p-10 shadow-2xl flex flex-col justify-between overflow-hidden">
 
-          {/* Search Inputs */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+            {/* Decorative top shimmer */}
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
 
-            {/* Location */}
-            <div className="md:col-span-4 relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <MapPin className="h-5 w-5 text-gray-400 group-hover:text-primary transition-colors" />
+            <div className="flex flex-col md:flex-row items-center justify-between gap-10">
+
+              {/* Static Tabs / Badges - Enhanced */}
+              <div className="flex items-center gap-6">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary via-cyan-400 to-cyan-500 p-[1px] shadow-lg shadow-cyan-500/20">
+                    <div className="w-full h-full bg-black/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                      <Car className="text-white w-8 h-8" />
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-primary tracking-widest uppercase">Cars</span>
+                </div>
+
+                <div className="h-12 w-[1px] bg-white/10"></div>
+
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 via-purple-400 to-indigo-500 p-[1px] shadow-lg shadow-purple-500/20">
+                    <div className="w-full h-full bg-black/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                      <Bike className="text-white w-8 h-8" />
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-purple-400 tracking-widest uppercase">Bikes</span>
+                </div>
               </div>
-              <input
-                type="text"
-                placeholder="Pick-up Location"
-                className="w-full bg-secondary/50 border border-white/10 text-white rounded-xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 outline-none transition-all placeholder:text-gray-500"
-              />
-            </div>
 
-            {/* Date */}
-            <div className="md:col-span-3 relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Calendar className="h-5 w-5 text-gray-400 group-hover:text-primary transition-colors" />
+              {/* Tagline */}
+              <div className="flex-1 text-center md:text-left md:pl-6 md:border-l border-white/10">
+                <p className="text-2xl md:text-3xl font-medium text-white tracking-tight">
+                  Start your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-300 font-bold">premium experience</span> today.
+                </p>
+                <p className="text-sm text-gray-500 mt-2">Unlimited kms • No deposit • 24/7 Support</p>
               </div>
-              <input
-                type="date"
-                className="w-full bg-secondary/50 border border-white/10 text-white rounded-xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 outline-none transition-all [color-scheme:dark]"
-              />
-            </div>
 
-            {/* Time */}
-            <div className="md:col-span-3 relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Clock className="h-5 w-5 text-gray-400 group-hover:text-primary transition-colors" />
+              {/* Search Button - Big & Bold */}
+              <div className="w-full md:w-auto">
+                <button
+                  onClick={() => onNavigate('vehicles')}
+                  className="w-full md:w-auto relative overflow-hidden bg-white text-black font-black text-lg py-5 px-10 rounded-xl transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-white/10 group/btn"
+                >
+                  <span className="relative z-10 flex items-center gap-3">
+                    Explore Fleet <ArrowRight className="w-6 h-6 group-hover/btn:translate-x-1 transition-transform" />
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary via-cyan-300 to-primary opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                </button>
               </div>
-              <input
-                type="time"
-                className="w-full bg-secondary/50 border border-white/10 text-white rounded-xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 outline-none transition-all [color-scheme:dark]"
-              />
-            </div>
 
-            {/* Search Button */}
-            <div className="md:col-span-2">
-              <button
-                onClick={onSearch} // Trigger parent navigation
-                className="w-full bg-primary hover:bg-cyan-400 text-black font-bold py-4 rounded-xl transition-all duration-300 shadow-lg shadow-primary/20 hover:shadow-primary/40 flex items-center justify-center gap-2 group active:scale-95"
-              >
-                <Search className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                <span>Search</span>
-              </button>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );

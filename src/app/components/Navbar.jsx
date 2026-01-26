@@ -5,12 +5,21 @@ const Navbar = ({ onNavigate, currentView, user, onLogout }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const navLinks = [
+        { name: 'Admin', id: 'admin-login' },
         { name: 'Home', id: 'home' },
         { name: 'Vehicles', id: 'vehicles' },
         { name: 'Become a Host', id: 'become-host' },
     ];
 
     const handleNavClick = (viewId) => {
+        if (viewId === 'become-host' && !user) {
+            // If user tries to access 'become-host' without login, redirect to login
+            onNavigate('login');
+            // You might want to pass a message or state to login page to redirect back, 
+            // but for now simpler is just to go to login.
+            setIsOpen(false);
+            return;
+        }
         onNavigate(viewId);
         setIsOpen(false);
         window.scrollTo({ top: 0, behavior: 'smooth' });

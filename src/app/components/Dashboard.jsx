@@ -1,8 +1,48 @@
 import React, { useState } from 'react';
-import { User, CreditCard, LayoutDashboard, Clock, Settings, LogOut, Car, Calendar, MapPin, Shield, CheckCircle, AlertTriangle } from 'lucide-react';
+import { User, CreditCard, LayoutDashboard, Clock, Settings, LogOut, Car, Calendar, MapPin, Shield, CheckCircle, AlertTriangle, Bell, Lock, Globe, ChevronRight, Moon, HelpCircle, FileText } from 'lucide-react';
+import CancelRideDialog from './CancelRideDialog';
+import ExtendTripDialog from './ExtendTripDialog';
 
-const Dashboard = ({ onNavigate, user, bookings = [] }) => {
+
+const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelBooking }) => {
     const [activeTab, setActiveTab] = useState('overview');
+
+    // Settings Sub-view State
+    const [settingsView, setSettingsView] = useState('main'); // main, password, language, help, privacy
+    const [passwordForm, setPasswordForm] = useState({ current: '', new: '', confirm: '' });
+    const [passwordSuccess, setPasswordSuccess] = useState(false);
+
+    const [expandedFaq, setExpandedFaq] = useState(null);
+    const [userDamageReports, setUserDamageReports] = useState([]);
+
+    React.useEffect(() => {
+        const storedReports = JSON.parse(localStorage.getItem('damageReports') || '[]');
+        // Filter for current user if user prop is present and has email, else for demo show all or none
+        // For this demo, let's show all since we are simulating the same browser session
+        if (user && user.email) {
+            setUserDamageReports(storedReports.filter(r => r.userId === user.email));
+        } else {
+            // Fallback for unauth user viewing demo dashboard or just empty
+            setUserDamageReports(storedReports);
+        }
+    }, [user]);
+
+    const handlePasswordUpdate = () => {
+        if (passwordForm.new !== passwordForm.confirm) {
+            alert("New passwords do not match!");
+            return;
+        }
+        if (!passwordForm.current || !passwordForm.new) {
+            alert("Please fill in all fields.");
+            return;
+        }
+        // Simulate API call
+        setTimeout(() => {
+            setPasswordSuccess(true);
+            setPasswordForm({ current: '', new: '', confirm: '' });
+        }, 500);
+    };
+
 
     // Use passed user prop or fallback to empty object to prevent errors
     const mockUser = user || {
@@ -30,6 +70,284 @@ const Dashboard = ({ onNavigate, user, bookings = [] }) => {
         status: b.status || 'Upcoming',
         image: b.vehicle.image
     }));
+
+    // State for toggles
+    const [notifications, setNotifications] = useState(true);
+    const [twoFactor, setTwoFactor] = useState(false);
+
+    // Dialog States
+    const [isCancelOpen, setIsCancelOpen] = useState(false);
+    const [isExtendOpen, setIsExtendOpen] = useState(false);
+    const [bookingToCancel, setBookingToCancel] = useState(null);
+
+    const handleCancelRide = (bookingId) => {
+        setBookingToCancel(bookingId);
+        setIsCancelOpen(true);
+    };
+
+    const handleConfirmCancel = (data) => {
+        console.log("Ride Cancelled:", data);
+        if (onCancelBooking && bookingToCancel) {
+            onCancelBooking(bookingToCancel);
+        }
+        setIsCancelOpen(false);
+    };
+
+    const handleExtendTrip = () => {
+        setIsExtendOpen(true);
+    };
+
+    const handleConfirmExtend = (data) => {
+        console.log("Trip Extended:", data);
+        if (onUpdateBooking && bookings.length > 0) {
+            // Calculate new date range string
+            // Current dates: "22/01/2026 - 25/01/2026" or similar
+            // This is a rough estimation for demo purposes
+            const currentBooking = bookings[0];
+            const newEndDate = data.newEndDate || "Extended";
+
+            // Assuming date format is kept in 'date' field as a string mostly
+            // We just append " (Extended)" for visual feedback in this demo if parsing is hard
+
+            onUpdateBooking({
+                id: currentBooking.id,
+                date: `${currentBooking.date.split(' to ')[0]} to ${newEndDate}`,
+                cost: `₹${parseInt(currentBooking.cost?.replace('₹', '') || 0) + data.additionalCost}`,
+                status: 'Extended'
+            });
+        }
+    };
+
+    // Removed placeholder handlers to avoid conflicts
+
+    const ChevronLeft = ({ size = 24, className = "" }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path d="m15 18-6-6 6-6" />
+        </svg>
+    );
+
+
+
+    const renderChangePassword = () => (
+        <div className="bg-secondary/20 border border-white/5 rounded-2xl p-6 space-y-6 animate-in slide-in-from-right">
+            <button onClick={() => { setSettingsView('main'); setPasswordSuccess(false); }} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4">
+                <ChevronLeft size={20} /> Back
+            </button>
+            <h3 className="text-xl font-bold text-white mb-6">Change Password</h3>
+
+            {passwordSuccess ? (
+                <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-8 text-center animate-in zoom-in duration-300">
+                    <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <CheckCircle size={32} className="text-green-500" />
+                    </div>
+                    <h4 className="text-xl font-bold text-white mb-2">Password Changed!</h4>
+                    <p className="text-gray-400">Your password has been successfully updated.</p>
+                    <button
+                        onClick={() => setSettingsView('main')}
+                        className="mt-6 bg-secondary hover:bg-white/10 text-white px-6 py-2 rounded-xl border border-white/10 transition-colors"
+                    >
+                        Return to Settings
+                    </button>
+                </div>
+            ) : (
+                <div className="space-y-4 max-w-md">
+                    <div className="space-y-2">
+                        <label className="text-gray-400 text-sm">Current Password</label>
+                        <input
+                            type="password"
+                            value={passwordForm.current}
+                            onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary outline-none"
+                            placeholder="Enter current password"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-gray-400 text-sm">New Password</label>
+                        <input
+                            type="password"
+                            value={passwordForm.new}
+                            onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary outline-none"
+                            placeholder="Enter new password"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-gray-400 text-sm">Confirm New Password</label>
+                        <input
+                            type="password"
+                            value={passwordForm.confirm}
+                            onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary outline-none"
+                            placeholder="Re-enter new password"
+                        />
+                    </div>
+                    <div className="pt-4">
+                        <button
+                            onClick={handlePasswordUpdate}
+                            className="w-full bg-primary text-black font-bold py-3 rounded-xl hover:bg-cyan-400 transition-colors shadow-lg shadow-primary/20"
+                        >
+                            Update Password
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+
+    const renderLanguage = () => (
+        <div className="bg-secondary/20 border border-white/5 rounded-2xl p-6 space-y-6 animate-in slide-in-from-right">
+            <button onClick={() => setSettingsView('main')} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4">
+                <ChevronLeft size={20} /> Back
+            </button>
+            <h3 className="text-xl font-bold text-white mb-6">Language Selection</h3>
+
+            <div className="space-y-2">
+                <button className="w-full flex items-center justify-between p-4 bg-primary/10 border border-primary/20 rounded-xl">
+                    <div className="flex items-center gap-4">
+                        <div className="p-2 bg-primary/20 rounded-lg text-primary">
+                            <Globe size={20} />
+                        </div>
+                        <span className="text-white font-medium">English (United States)</span>
+                    </div>
+                    <CheckCircle size={20} className="text-primary" />
+                </button>
+                <button className="w-full flex items-center justify-between p-4 bg-black/20 border border-white/5 rounded-xl opacity-50 cursor-not-allowed">
+                    <div className="flex items-center gap-4">
+                        <div className="p-2 bg-white/5 rounded-lg text-gray-400">
+                            <Globe size={20} />
+                        </div>
+                        <span className="text-gray-400 font-medium">Hindi (Coming Soon)</span>
+                    </div>
+                </button>
+                <button className="w-full flex items-center justify-between p-4 bg-black/20 border border-white/5 rounded-xl opacity-50 cursor-not-allowed">
+                    <div className="flex items-center gap-4">
+                        <div className="p-2 bg-white/5 rounded-lg text-gray-400">
+                            <Globe size={20} />
+                        </div>
+                        <span className="text-gray-400 font-medium">Tamil (Coming Soon)</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    );
+
+    const renderHelpCenter = () => {
+        const faqData = [
+            {
+                question: 'How do I cancel my booking?',
+                answer: 'You can cancel your booking from the "My Rides" section. Cancellations made 24 hours before the trip start time are fully refundable.'
+            },
+            {
+                question: 'What documents are required?',
+                answer: 'A valid Driving License and a Government-issued ID proof (Aadhar Card/Passport) are required at the time of pickup.'
+            },
+            {
+                question: 'Is fuel included in the price?',
+                answer: 'No, fuel is not included. You will receive the vehicle with a certain fuel level and must return it with the same level. Excess fuel is not reimbursed.'
+            }
+        ];
+
+        return (
+            <div className="bg-secondary/20 border border-white/5 rounded-2xl p-6 space-y-6 animate-in slide-in-from-right">
+                <button onClick={() => setSettingsView('main')} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4">
+                    <ChevronLeft size={20} /> Back
+                </button>
+                <h3 className="text-xl font-bold text-white mb-6">Help Center</h3>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-black/40 border border-white/10 rounded-2xl p-6 text-center space-y-4 hover:border-primary/50 transition-colors group">
+                        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto group-hover:bg-primary/20 transition-colors">
+                            <div className="text-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 className="text-white font-bold text-lg">Call Support</h4>
+                            <p className="text-gray-500 text-sm mb-4">Available 24/7 for urgent issues</p>
+                            <a href="tel:+919585899711" className="text-primary font-mono text-xl font-bold hover:underline">+91 95858 99711</a>
+                        </div>
+                    </div>
+
+                    <div className="bg-black/40 border border-white/10 rounded-2xl p-6 text-center space-y-4 hover:border-primary/50 transition-colors group">
+                        <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto group-hover:bg-blue-500/20 transition-colors">
+                            <div className="text-blue-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 className="text-white font-bold text-lg">Email Support</h4>
+                            <p className="text-gray-500 text-sm mb-4">Get response within 24 hours</p>
+                            <a href="mailto:support@wheelio.com" className="text-blue-400 text-lg font-medium hover:underline">support@wheelio.com</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-8 pt-8 border-t border-white/5">
+                    <h4 className="text-white font-bold mb-4">Frequently Asked Questions</h4>
+                    <div className="space-y-4">
+                        {faqData.map((item, i) => (
+                            <div key={i} className="bg-black/20 rounded-xl overflow-hidden transition-all">
+                                <button
+                                    onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
+                                    className="w-full p-4 flex items-center justify-between cursor-pointer hover:bg-black/30 transition-colors text-left"
+                                >
+                                    <span className="text-gray-300 font-medium">{item.question}</span>
+                                    <ChevronRight
+                                        size={16}
+                                        className={`text-gray-500 transition-transform duration-300 ${expandedFaq === i ? 'rotate-90' : ''}`}
+                                    />
+                                </button>
+                                <div
+                                    className={`px-4 text-gray-400 text-sm overflow-hidden transition-all duration-300 ${expandedFaq === i ? 'max-h-40 py-4 border-t border-white/5' : 'max-h-0'}`}
+                                >
+                                    {item.answer}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderPrivacyPolicy = () => (
+        <div className="bg-secondary/20 border border-white/5 rounded-2xl p-6 space-y-6 animate-in slide-in-from-right">
+            <button onClick={() => setSettingsView('main')} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4">
+                <ChevronLeft size={20} /> Back
+            </button>
+
+            <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xl font-bold text-white">Privacy & Ethics</h3>
+                <Shield className="text-primary" size={24} />
+            </div>
+
+            <div className="space-y-6 text-gray-300 leading-relaxed max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                <section>
+                    <h4 className="text-white font-bold mb-2">1. Our Commitment to Privacy</h4>
+                    <p className="text-sm">At Wheelio, we believe that trust is the foundation of every journey. We are committed to protecting your personal data and ensuring transparency in how we collect, use, and share your information. Your privacy is not just a policy; it is our ethical responsibility.</p>
+                </section>
+
+                <section>
+                    <h4 className="text-white font-bold mb-2">2. Data Collection Ethics</h4>
+                    <p className="text-sm">We only collect data that is strictly necessary to provide our services, such as your identity verification (Driving License) and contact details for booking coordination. We explicitly condemn the sale of user data to third parties. Your data belongs to you.</p>
+                </section>
+
+                <section>
+                    <h4 className="text-white font-bold mb-2">3. Security Measures</h4>
+                    <p className="text-sm">We employ state-of-the-art encryption standards to safeguard your sensitive information. From payment details to personal identification documents, every piece of data is treated with the highest level of security protocols.</p>
+                </section>
+
+                <section>
+                    <h4 className="text-white font-bold mb-2">4. User Rights</h4>
+                    <p className="text-sm">You have the absolute right to access, correct, or delete your personal data from our systems at any time. We provide easy-to-use tools within this app to manage your data preferences.</p>
+                </section>
+
+                <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 mt-4">
+                    <p className="text-xs text-primary/80 italic">"We respect your privacy as much as we respect your journey."</p>
+                </div>
+            </div>
+        </div>
+    );
 
     const menuItems = [
         { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -165,12 +483,15 @@ const Dashboard = ({ onNavigate, user, bookings = [] }) => {
 
                                         <div className="mt-8 pt-6 border-t border-white/5 flex gap-4">
                                             <button
-                                                onClick={() => onNavigate('contact')}
+                                                onClick={() => handleCancelRide(bookings[0]?.id || 'mock-id')}
                                                 className="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-500 py-3 rounded-xl font-bold transition-colors border border-red-500/20"
                                             >
-                                                Report Issue
+                                                Cancel Ride
                                             </button>
-                                            <button className="flex-1 bg-white/5 hover:bg-white/10 text-white py-3 rounded-xl font-bold transition-colors border border-white/10">
+                                            <button
+                                                onClick={handleExtendTrip}
+                                                className="flex-1 bg-white/5 hover:bg-white/10 text-white py-3 rounded-xl font-bold transition-colors border border-white/10"
+                                            >
                                                 Extend Trip
                                             </button>
                                         </div>
@@ -189,6 +510,39 @@ const Dashboard = ({ onNavigate, user, bookings = [] }) => {
                                     </button>
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {/* Damage Reports Section - Overview */}
+                    {activeTab === 'overview' && userDamageReports.length > 0 && (
+                        <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
+                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                <AlertTriangle className="text-yellow-500" /> Damage Reports & Alerts
+                            </h3>
+                            <div className="grid gap-4 md:grid-cols-2">
+                                {userDamageReports.map((report) => (
+                                    <div key={report.id} className="bg-secondary/20 border border-white/5 rounded-2xl p-6 relative overflow-hidden group hover:border-primary/20 transition-all">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <h4 className="font-bold text-white">Incident at {report.location}</h4>
+                                                <p className="text-xs text-gray-500">{new Date(report.submittedAt).toLocaleDateString()}</p>
+                                            </div>
+                                            <span className={`text-xs px-2 py-1 rounded-full font-bold uppercase ${report.status === 'Estimated' ? 'bg-orange-500/20 text-orange-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
+                                                {report.status}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-gray-400 mb-4 line-clamp-2">{report.description}</p>
+
+                                        {report.estimatedCost > 0 && (
+                                            <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl animate-pulse">
+                                                <p className="text-xs text-red-400 uppercase font-bold mb-1">Damage Assessment Cost</p>
+                                                <div className="text-2xl font-bold text-white">₹{report.estimatedCost}</div>
+                                                <p className="text-xs text-gray-400 mt-1">Please pay this amount to clear your dues.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
 
@@ -234,7 +588,7 @@ const Dashboard = ({ onNavigate, user, bookings = [] }) => {
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-gray-400 text-sm">Phone Number</label>
-                                        <input type="tel" defaultValue="+91 98765 43210" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary outline-none" />
+                                        <input type="tel" defaultValue="+91" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary outline-none" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-gray-400 text-sm">City</label>
@@ -262,15 +616,157 @@ const Dashboard = ({ onNavigate, user, bookings = [] }) => {
                     {/* SETTINGS TAB */}
                     {activeTab === 'settings' && (
                         <div className="space-y-6 animate-in slide-in-from-right duration-300">
-                            <h2 className="text-2xl font-bold text-white">App Preferences</h2>
-                            <div className="bg-secondary/20 border border-white/5 rounded-2xl p-6">
-                                <p className="text-gray-400">Settings configuration coming soon...</p>
-                            </div>
+                            {settingsView === 'main' && (
+                                <div className="space-y-6 animate-in slide-in-from-right duration-300">
+                                    <h2 className="text-2xl font-bold text-white">App Preferences</h2>
+
+                                    {/* Account & Security */}
+                                    <div className="bg-secondary/20 border border-white/5 rounded-2xl p-6 space-y-4">
+                                        <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                                            <Shield size={20} className="text-primary" /> Security & Privacy
+                                        </h3>
+
+                                        <button
+                                            onClick={() => setSettingsView('password')}
+                                            className="w-full flex items-center justify-between p-4 bg-black/20 hover:bg-black/40 rounded-xl transition-colors group cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
+                                                    <Lock size={20} />
+                                                </div>
+                                                <div className="text-left">
+                                                    <div className="text-white font-medium">Change Password</div>
+                                                    <div className="text-sm text-gray-400">Update your account password</div>
+                                                </div>
+                                            </div>
+                                            <ChevronRight size={20} className="text-gray-500 group-hover:text-white transition-colors" />
+                                        </button>
+
+                                        <button
+                                            onClick={() => setTwoFactor(!twoFactor)}
+                                            className="w-full flex items-center justify-between p-4 bg-black/20 hover:bg-black/40 rounded-xl transition-colors group cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-2 bg-green-500/10 rounded-lg text-green-500">
+                                                    <Shield size={20} />
+                                                </div>
+                                                <div className="text-left">
+                                                    <div className="text-white font-medium">Two-Factor Authentication</div>
+                                                    <div className="text-sm text-gray-400">Add an extra layer of security</div>
+                                                </div>
+                                            </div>
+                                            <div className={`w-10 h-6 rounded-full relative transition-colors ${twoFactor ? 'bg-primary' : 'bg-white/10'}`}>
+                                                <div className={`absolute top-1 w-4 h-4 rounded-full bg-black transition-all ${twoFactor ? 'right-1' : 'left-1'}`}></div>
+                                            </div>
+                                        </button>
+                                    </div>
+
+                                    {/* Preferences */}
+                                    <div className="bg-secondary/20 border border-white/5 rounded-2xl p-6 space-y-4">
+                                        <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                                            <Settings size={20} className="text-primary" /> General
+                                        </h3>
+
+                                        <button
+                                            onClick={() => setNotifications(!notifications)}
+                                            className="w-full flex items-center justify-between p-4 bg-black/20 hover:bg-black/40 rounded-xl transition-colors group cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-2 bg-purple-500/10 rounded-lg text-purple-500">
+                                                    <Bell size={20} />
+                                                </div>
+                                                <div className="text-left">
+                                                    <div className="text-white font-medium">Notifications</div>
+                                                    <div className="text-sm text-gray-400">Manage your alert preferences</div>
+                                                </div>
+                                            </div>
+                                            <div className={`w-10 h-6 rounded-full relative transition-colors ${notifications ? 'bg-primary' : 'bg-white/10'}`}>
+                                                <div className={`absolute top-1 w-4 h-4 rounded-full bg-black transition-all ${notifications ? 'right-1' : 'left-1'}`}></div>
+                                            </div>
+                                        </button>
+
+                                        <button
+                                            onClick={() => setSettingsView('language')}
+                                            className="w-full flex items-center justify-between p-4 bg-black/20 hover:bg-black/40 rounded-xl transition-colors group cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-2 bg-yellow-500/10 rounded-lg text-yellow-500">
+                                                    <Globe size={20} />
+                                                </div>
+                                                <div className="text-left">
+                                                    <div className="text-white font-medium">Language</div>
+                                                    <div className="text-sm text-gray-400">English (India)</div>
+                                                </div>
+                                            </div>
+                                            <ChevronRight size={20} className="text-gray-500 group-hover:text-white transition-colors" />
+                                        </button>
+                                    </div>
+
+                                    {/* Support & Legal */}
+                                    <div className="bg-secondary/20 border border-white/5 rounded-2xl p-6 space-y-4">
+                                        <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                                            <HelpCircle size={20} className="text-primary" /> Support & Legal
+                                        </h3>
+
+                                        <button
+                                            onClick={() => setSettingsView('privacy')}
+                                            className="w-full flex items-center justify-between p-4 bg-black/20 hover:bg-black/40 rounded-xl transition-colors group cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-2 bg-red-500/10 rounded-lg text-red-500">
+                                                    <FileText size={20} />
+                                                </div>
+                                                <div className="text-left">
+                                                    <div className="text-white font-medium">Privacy Policy</div>
+                                                    <div className="text-sm text-gray-400">Read our terms and conditions</div>
+                                                </div>
+                                            </div>
+                                            <ChevronRight size={20} className="text-gray-500 group-hover:text-white transition-colors" />
+                                        </button>
+
+                                        <button
+                                            onClick={() => setSettingsView('help')}
+                                            className="w-full flex items-center justify-between p-4 bg-black/20 hover:bg-black/40 rounded-xl transition-colors group cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-2 bg-cyan-500/10 rounded-lg text-cyan-500">
+                                                    <HelpCircle size={20} />
+                                                </div>
+                                                <div className="text-left">
+                                                    <div className="text-white font-medium">Help Center</div>
+                                                    <div className="text-sm text-gray-400">Get help with your bookings</div>
+                                                </div>
+                                            </div>
+                                            <ChevronRight size={20} className="text-gray-500 group-hover:text-white transition-colors" />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {settingsView === 'password' && renderChangePassword()}
+                            {settingsView === 'language' && renderLanguage()}
+                            {settingsView === 'help' && renderHelpCenter()}
+                            {settingsView === 'privacy' && renderPrivacyPolicy()}
                         </div>
                     )}
 
                 </div>
             </div>
+
+            {/* Dialogs */}
+            <CancelRideDialog
+                isOpen={isCancelOpen}
+                onClose={() => setIsCancelOpen(false)}
+                onConfirm={handleConfirmCancel}
+                bookingId={bookingToCancel}
+            />
+
+            <ExtendTripDialog
+                isOpen={isExtendOpen}
+                onClose={() => setIsExtendOpen(false)}
+                onConfirm={handleConfirmExtend}
+                currentEndDate={activeRental?.dates}
+            />
         </div>
     );
 };

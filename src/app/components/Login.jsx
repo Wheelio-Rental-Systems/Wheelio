@@ -18,8 +18,10 @@ const Login = ({ onNavigate, onLogin }) => {
             setIsLoading(false);
             // Derive name from email for demo if not provided, or use a default
             const nameFromEmail = email.split('@')[0];
+
+
             const userData = {
-                name: nameFromEmail, // User requested name to be related to email or just email
+                name: nameFromEmail,
                 email: email,
                 avatar: null,
                 memberSince: 'Jan 2026',

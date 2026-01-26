@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import VehicleCard from './VehicleCard';
+import { toast } from 'sonner';
 import { Filter } from 'lucide-react';
 import { vehicles } from '../data/vehicles';
 import { VehicleDetailsDialog } from './VehicleDetailsDialog';
 
-const VehicleList = ({ onBook }) => {
+const VehicleList = ({ onBook, user }) => {
     // State for advanced filters
     const [filters, setFilters] = useState({
         type: 'all',
@@ -48,6 +49,11 @@ const VehicleList = ({ onBook }) => {
     };
 
     const handleBookFromDialog = () => {
+        if (!user) {
+            toast.error("Please login/sign up to enable booking");
+            return;
+        }
+
         if (selectedVehicle) {
             onBook(selectedVehicle);
             setDetailsOpen(false);

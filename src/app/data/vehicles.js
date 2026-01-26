@@ -5,7 +5,7 @@ export const vehicles = [
     name: 'Maruti Swift',
     brand: 'Maruti Suzuki',
     type: 'Hatchback',
-    image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=1000&q=80',
+    image: '/images/swift.jpeg',
     price: 1200,
     rating: 4.5,
     reviews: 328,
@@ -23,14 +23,22 @@ export const vehicles = [
       fuelTank: '37 L'
     },
     features: ['Dual Airbags', 'ABS with EBD', 'Touchscreen Infotainment', 'Steering Mounted Controls', 'Rear Parking Sensors'],
-    description: "The Maruti Swift is India's favourite hatchback, known for its sporty design and peppy performance. Perfect for city driving with excellent fuel efficiency."
+    description: "The Maruti Swift is India's favourite hatchback, known for its sporty design and peppy performance. Perfect for city driving with excellent fuel efficiency.",
+    images: [
+
+      '/images/swift.jpeg',
+      '/images/swift1.avif',
+      '/images/swift2.jpg',
+      '/images/swift3.avif'
+
+    ]
   },
   {
     id: 2,
     name: 'Hyundai Creta',
     brand: 'Hyundai',
     type: 'SUV',
-    image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1000&q=80',
+    image: '/images/creta.jpg',
     price: 2500,
     rating: 4.7,
     reviews: 412,
@@ -48,14 +56,22 @@ export const vehicles = [
       fuelTank: '50 L'
     },
     features: ['Panoramic Sunroof', 'Ventilated Seats', 'Bose Sound System', '6 Airbags', 'Wireless Charging'],
-    description: "The Ultimate SUV. The Hyundai Creta offers a premium driving experience with feature-loaded interiors and a powerful diesel engine."
+    description: "The Ultimate SUV. The Hyundai Creta offers a premium driving experience with feature-loaded interiors and a powerful diesel engine.",
+    images: [
+
+      '/images/creta.jpg',
+      '/images/creta1.avif',
+      '/images/creta2.jpeg',
+      '/images/creta3.jpg',
+
+    ]
   },
   {
     id: 3,
     name: 'Mahindra Thar 4x4',
     brand: 'Mahindra',
     type: 'SUV',
-    image: 'https://images.unsplash.com/photo-1609529669235-c07e4e1bd6e9?auto=format&fit=crop&w=1000&q=80',
+    image: '/images/thar.jpeg',
     price: 3500,
     rating: 4.8,
     reviews: 560,
@@ -73,14 +89,20 @@ export const vehicles = [
       fuelTank: '57 L'
     },
     features: ['4x4 Drivetrain', 'Convertible Top', 'Touchscreen Display', 'All-Terrain Tyres', 'Roll Caption'],
-    description: "Explore the impossible. The Mahindra Thar is a legendary off-roader built to tackle any terrain with ease and style."
+    description: "Explore the impossible. The Mahindra Thar is a legendary off-roader built to tackle any terrain with ease and style.",
+    images: [
+      '/images/thar.jpeg',
+      '/images/thar1.jpg',
+      '/images/thar 2.jpg',
+      '/images/thar3.jpeg'
+    ]
   },
   {
     id: 4,
     name: 'Tata Nexon EV',
     brand: 'Tata Motors',
     type: 'SUV',
-    image: 'https://images.unsplash.com/photo-1669286438063-22f36ca6d5c5?q=80&w=2070&auto=format&fit=crop', // Creative placeholder
+    image: '/images/tata nexon ev.jpg',
     price: 2800,
     rating: 4.6,
     reviews: 215,
@@ -98,14 +120,20 @@ export const vehicles = [
       fuelTank: '40.5 kWh'
     },
     features: ['Regenerative Braking', 'Sunroof', 'Connected Car Tech', 'Fast Charging', 'Air Purifier'],
-    description: "Go Green with the Tata Nexon EV. Experience the thrill of instant torque and a silent, emission-free drive."
+    description: "Go Green with the Tata Nexon EV. Experience the thrill of instant torque and a silent, emission-free drive.",
+    images: [
+      '/images/tata nexon ev.jpg',
+      '/images/nexon1.webp',
+      '/images/nexon2.jpeg',
+      '/images/nexon3.avif'
+    ]
   },
   {
     id: 5,
     name: 'Toyota Innova Crysta',
     brand: 'Toyota',
     type: 'MPV',
-    image: 'https://images.unsplash.com/photo-1503376763036-066120622c74?auto=format&fit=crop&w=1000&q=80',
+    image: '/images/toyata crysta.jpg',
     price: 3800,
     rating: 4.9,
     reviews: 890,
@@ -123,14 +151,20 @@ export const vehicles = [
       fuelTank: '55 L'
     },
     features: ['Captain Seats', 'Ambient Lighting', '7 Airbags', 'Cruise Control', 'Foldable Tables'],
-    description: "Unmatched Comfort. The Innova Crysta is the perfect choice for long family trips, offering ample space and a plush ride."
+    description: "Unmatched Comfort. The Innova Crysta is the perfect choice for long family trips, offering ample space and a plush ride.",
+    images: [
+      '/images/toyata crysta.jpg',
+      '/images/crysta2.avif',
+      '/images/crysta3.avif',
+      '/images/crysta3.jpeg'
+    ]
   },
   {
     id: 6,
     name: 'Honda City 5th Gen',
     brand: 'Honda',
     type: 'Sedan',
-    image: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1000&q=80',
+    image: '/images/honda city 5th gen.jpg',
     price: 2200,
     rating: 4.6,
     reviews: 180,
@@ -148,14 +182,20 @@ export const vehicles = [
       fuelTank: '40 L'
     },
     features: ['Lane Watch Camera', 'Sunroof', 'Alexa Support', '8-Speaker Audio', 'Leather Upholstery'],
-    description: "A class apart. The Honda City offers sophistication, comfort, and advanced technology for the discerning traveller."
+    description: "A class apart. The Honda City offers sophistication, comfort, and advanced technology for the discerning traveller.",
+    images: [
+      '/images/honda city 5th gen.jpg',
+      '/images/city2.jpg',
+      '/images/city3.avif',
+      '/images/city4.avif',
+    ]
   },
   {
     id: 7,
     name: 'Mahindra XUV700',
     brand: 'Mahindra',
     type: 'SUV',
-    image: 'https://images.unsplash.com/photo-1678782390776-5992a5481745?q=80&w=2070&auto=format&fit=crop',
+    image: '/images/Mahindra XUV700.jpeg',
     price: 3200,
     rating: 4.8,
     reviews: 350,
@@ -173,14 +213,20 @@ export const vehicles = [
       fuelTank: '60 L'
     },
     features: ['ADAS Level 2', 'Dual HD Screens', 'Skyroof', 'Sony 3D Audio', 'Smart Door Handles'],
-    description: "Experience the rush. The XUV700 is a tech-loaded beast that redefines the SUV segment in India."
+    description: "Experience the rush. The XUV700 is a tech-loaded beast that redefines the SUV segment in India.",
+    images: [
+      '/images/Mahindra XUV700.jpeg',
+      '/images/xuv2.jpeg',
+      '/images/xuv2.avif',
+      '/images/xuv3.avif',
+    ]
   },
   {
     id: 8,
     name: 'Kia Seltos',
     brand: 'Kia',
     type: 'SUV',
-    image: 'https://images.unsplash.com/photo-1621007947382-bb3c3968e3bb?auto=format&fit=crop&w=1000&q=80',
+    image: '/images/Kia Seltos.jpeg',
     price: 2400,
     rating: 4.5,
     reviews: 290,
@@ -198,14 +244,20 @@ export const vehicles = [
       fuelTank: '50 L'
     },
     features: ['Heads-Up Display', '360 Camera', 'Air Purifier', 'Mood Lighting', 'Ventilated Seats'],
-    description: "Badass by design. The Kia Seltos combines aggressive styling with premium features for a standout drive."
+    description: "Badass by design. The Kia Seltos combines aggressive styling with premium features for a standout drive.",
+    images: [
+      '/images/Kia Seltos.jpeg',
+      '/images/kia2.avif',
+      '/images/kia3.avif',
+      '/images/kia4.avif'
+    ]
   },
   {
     id: 9,
     name: 'Tata Safari',
     brand: 'Tata Motors',
     type: 'SUV',
-    image: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1000&q=80', // Placeholder
+    image: '/images/Tata Safari.webp',
     price: 3300,
     rating: 4.7,
     reviews: 200,
@@ -223,14 +275,21 @@ export const vehicles = [
       fuelTank: '50 L'
     },
     features: ['Panoramic Sunroof', 'Captain Seats', 'JBL Audio', 'Terrain Response', 'Connected Tech'],
-    description: "Reclaim your life. The iconic Tata Safari returns with modern luxury and commanding road presence."
+    description: "Reclaim your life. The iconic Tata Safari returns with modern luxury and commanding road presence.",
+    images: [
+      '/images/Tata Safari.webp',
+      '/images/safari2.avif',
+      '/images/safari3.jpg',
+      '/images/safari4.webp',
+
+    ]
   },
   {
     id: 10,
     name: 'Hyundai Verna',
     brand: 'Hyundai',
     type: 'Sedan',
-    image: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=1000&q=80',
+    image: '/images/Hyundai Verna.jpeg',
     price: 2100,
     rating: 4.4,
     reviews: 150,
@@ -248,14 +307,20 @@ export const vehicles = [
       fuelTank: '45 L'
     },
     features: ['ADAS', 'Dual 10.25" Screens', 'Heated Seats', 'Bose Audio', 'Parametric Design'],
-    description: "Futuristic Ferocity. The all-new Verna brings diverse design and thrilling turbo performance."
+    description: "Futuristic Ferocity. The all-new Verna brings diverse design and thrilling turbo performance.",
+    images: [
+      '/images/Hyundai Verna.jpeg',
+      '/images/verna2.webp',
+      '/images/verna3.jpg',
+      '/images/verna4.jpeg',
+    ]
   },
   {
     id: 11,
     name: 'Maruti Brezza',
     brand: 'Maruti Suzuki',
     type: 'SUV',
-    image: 'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&w=1000&q=80', // Placeholder
+    image: '/images/Maruti Brezza.avif',
     price: 1800,
     rating: 4.3,
     reviews: 400,
@@ -273,14 +338,20 @@ export const vehicles = [
       fuelTank: '48 L'
     },
     features: ['Sunroof', '360 Camera', 'Clean Tech', 'Heads Up Display', 'Smart Hybrid'],
-    description: "The City-Bred SUV. Compact, efficient, and packed with tech for the urban jungle."
+    description: "The City-Bred SUV. Compact, efficient, and packed with tech for the urban jungle.",
+    images: [
+      '/images/Maruti Brezza.avif',
+      '/images/bre2.avif',
+      '/images/bre3.jpeg',
+      '/images/bre4.avif',
+    ]
   },
   {
     id: 12,
     name: 'Fortuner Legender',
     brand: 'Toyota',
     type: 'SUV',
-    image: 'https://images.unsplash.com/photo-1688587609827-023cdd69d518?q=80&w=1932&auto=format&fit=crop',
+    image: '/images/Fortuner Legender.jpeg',
     price: 6500,
     rating: 4.9,
     reviews: 600,
@@ -298,7 +369,13 @@ export const vehicles = [
       fuelTank: '80 L'
     },
     features: ['4x4 Sigma 4', 'Kick Sensor Boot', 'Dual Zone AC', 'Wireless Charger', '11 Speakers'],
-    description: "Power to Lead. The Fortuner Legender commands respect with its unmatched durability and presence."
+    description: "Power to Lead. The Fortuner Legender commands respect with its unmatched durability and presence.",
+    images: [
+      '/images/Fortuner Legender.jpeg',
+      '/images/for2.jpeg',
+      '/images/for3.avif',
+      '/images/for4.webp'
+    ]
   },
 
   // --- BIKES ---
@@ -307,7 +384,7 @@ export const vehicles = [
     name: 'Royal Enfield Himalayan 450',
     brand: 'Royal Enfield',
     type: 'Bike',
-    image: 'https://images.unsplash.com/photo-1623079400394-18d4d54e5827?auto=format&fit=crop&w=1000&q=80',
+    image: '/images/himalayan 450.jpg',
     price: 1500,
     rating: 4.8,
     reviews: 420,
@@ -325,14 +402,20 @@ export const vehicles = [
       fuelTank: '17 L'
     },
     features: ['Tripper Navigation', 'Switchable ABS', 'Liquid Cooled', 'Ride-by-Wire', 'USD Forks'],
-    description: "Built for all roads, built for no roads. The Himalayan 450 is the ultimate adventure tourer."
+    description: "Built for all roads, built for no roads. The Himalayan 450 is the ultimate adventure tourer.",
+    images: [
+      '/images/himalayan 450.jpg',
+      '/images/re2.avif',
+      '/images/re3.webp',
+      '/images/re4.jpg'
+    ]
   },
   {
     id: 14,
     name: 'Royal Enfield Classic 350',
     brand: 'Royal Enfield',
     type: 'Bike',
-    image: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=1000&q=80',
+    image: '/images/cl1.avif',
     price: 1100,
     rating: 4.7,
     reviews: 950,
@@ -350,14 +433,21 @@ export const vehicles = [
       fuelTank: '13 L'
     },
     features: ['Dual Channel ABS', 'Digital-Analog Cluster', 'USB Port', 'Timeless Design', 'Thump Exhaust'],
-    description: "The Reborn Classic. Experience the pure motorcycling spirit with the refined J-series engine."
+    description: "The Reborn Classic. Experience the pure motorcycling spirit with the refined J-series engine.",
+    images: [
+      '/images/cl1.avif',
+      '/images/cl2.avif',
+      '/images/cl3.jpeg',
+      '/images/cl4.jpg',
+
+    ]
   },
   {
     id: 15,
     name: 'KTM Duke 390',
     brand: 'KTM',
     type: 'Bike',
-    image: 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=1000&q=80',
+    image: '/images/ktm duke 390.jpeg',
     price: 1800,
     rating: 4.6,
     reviews: 310,
@@ -375,14 +465,20 @@ export const vehicles = [
       fuelTank: '13.5 L'
     },
     features: ['Quickshifter+', 'TFT Display', 'Cornering ABS', 'Launch Control', 'Supermoto Mode'],
-    description: "The Corner Rocket. Pure adrenaline on two wheels, perfect for track days and canyon carving."
+    description: "The Corner Rocket. Pure adrenaline on two wheels, perfect for track days and canyon carving.",
+    images: [
+      '/images/ktm duke 390.jpeg',
+      '/images/duke1.avif',
+      '/images/duke2.jpg',
+      '/images/duke4.avif'
+    ]
   },
   {
     id: 16,
     name: 'Bajaj Dominar 400',
     brand: 'Bajaj',
     type: 'Bike',
-    image: 'https://images.unsplash.com/photo-1662499118559-001099b2df99?q=80&w=2072&auto=format&fit=crop',
+    image: '/images/dom.jpg',
     price: 1400,
     rating: 4.4,
     reviews: 250,
@@ -400,14 +496,23 @@ export const vehicles = [
       fuelTank: '13 L'
     },
     features: ['Touring Accessories', 'USD Forks', 'Diamond Cut Wheels', 'LED Headlamp', 'Slipper Clutch'],
-    description: "The Sports Tourer. Built for long-distance dominance with superior comfort and power."
+    description: "The Sports Tourer. Built for long-distance dominance with superior comfort and power.",
+    images: [
+
+      '/images/dom.jpg',
+      '/images/dom2.jpg',
+      '/images/dom3.jpeg',
+      '/images/dom4.avif'
+
+
+    ]
   },
   {
     id: 17,
     name: 'Yamaha R15 V4',
     brand: 'Yamaha',
     type: 'Bike',
-    image: 'https://images.unsplash.com/photo-1614169550380-6060c4a4501a?q=80&w=1974&auto=format&fit=crop', // Placeholder R1
+    image: '/images/r15.jpg',
     price: 1200,
     rating: 4.8,
     reviews: 500,
@@ -425,14 +530,20 @@ export const vehicles = [
       fuelTank: '11 L'
     },
     features: ['Quickshifter', 'Traction Control', 'VVA Technology', 'Upside Down Forks', 'Track Mode'],
-    description: "Racing DNA. Use the R-World with the most advanced 155cc motorcycle in India."
+    description: "Racing DNA. Use the R-World with the most advanced 155cc motorcycle in India.",
+    images: [
+      '/images/r15.jpg',
+      '/images/r2.jpg',
+      '/images/r3.jpg',
+      '/images/r5.jpg'
+    ]
   },
   {
     id: 18,
     name: 'TVS Apache RR 310',
     brand: 'TVS',
     type: 'Bike',
-    image: 'https://images.unsplash.com/photo-1657805216333-e1d9361df439?q=80&w=1931&auto=format&fit=crop',
+    image: '/images/TVS Apache RR 310.jpeg',
     price: 1600,
     rating: 4.7,
     reviews: 180,
@@ -450,14 +561,20 @@ export const vehicles = [
       fuelTank: '11 L'
     },
     features: ['Ride Modes', 'TFT Display', 'Michelin Tyres', 'BTO Kit', 'SmartXonnect'],
-    description: "Crafted to outperform. A flagship racer from TVS with BMW engineering at its heart."
+    description: "Crafted to outperform. A flagship racer from TVS with BMW engineering at its heart.",
+    images: [
+      '/images/TVS Apache RR 310.jpeg',
+      '/images/tvs2.jpg',
+      '/images/tvs3.webp',
+      '/images/tvs4.jpg'
+    ]
   },
   {
     id: 19,
     name: 'Honda Hness CB350',
     brand: 'Honda',
     type: 'Bike',
-    image: 'https://images.unsplash.com/photo-1591637333184-19aa84b3e01f?auto=format&fit=crop&w=1000&q=80', // Placeholder
+    image: '/images/Honda Hness CB350.jpeg',
     price: 1300,
     rating: 4.6,
     reviews: 210,
@@ -475,14 +592,20 @@ export const vehicles = [
       fuelTank: '15 L'
     },
     features: ['Honda Smartphone Voice Control', 'Traction Control', 'Assist Slipper Clutch', 'Full LED', 'Chrome Finish'],
-    description: "Your Highness has arrived. A perfect blend of classic style and modern Japanese reliability."
+    description: "Your Highness has arrived. A perfect blend of classic style and modern Japanese reliability.",
+    images: [
+      '/images/Honda Hness CB350.jpeg',
+      '/images/honda2.jpg',
+      '/images/hond3.jpg',
+      '/images/honda4.avif'
+    ]
   },
   {
     id: 20,
     name: 'Jawa 42 Bobber',
     brand: 'Jawa',
     type: 'Bike',
-    image: 'https://images.unsplash.com/photo-1629813567706-e74f391ae883?q=80&w=1935&auto=format&fit=crop', // Placeholder
+    image: '/images/Jawa 42 Bobber.jpg',
     price: 1450,
     rating: 4.5,
     reviews: 150,
@@ -500,14 +623,20 @@ export const vehicles = [
       fuelTank: '12.5 L'
     },
     features: ['Floating Seat', 'LED Tail Lamp', 'USB Charging', 'Moonstone White', 'Bar End Mirrors'],
-    description: "Factory Custom. Make a statement with the most stylish and accessible bobber in the country."
+    description: "Factory Custom. Make a statement with the most stylish and accessible bobber in the country.",
+    images: [
+      '/images/Jawa 42 Bobber.jpg',
+      '/images/bob2.avif',
+      '/images/bob3.avif',
+      '/images/bob4.avif'
+    ]
   },
   {
     id: 21,
     name: 'Hero Xpulse 200 4V',
     brand: 'Hero',
     type: 'Bike',
-    image: 'https://images.unsplash.com/photo-1635073479632-15f5c0934988?q=80&w=2028&auto=format&fit=crop',
+    image: '/images/Hero Xpulse 200 4V.jpg',
     price: 1000,
     rating: 4.4,
     reviews: 300,
@@ -525,14 +654,20 @@ export const vehicles = [
       fuelTank: '13 L'
     },
     features: ['Rally Kit Compatible', 'Turn-by-Turn Nav', 'Long Travel Suspension', 'ABS', 'LED Headlight'],
-    description: "Make New Tracks. India's best entry-level adventure motorcycle for off-road enthusiasts."
+    description: "Make New Tracks. India's best entry-level adventure motorcycle for off-road enthusiasts.",
+    images: [
+      '/images/Hero Xpulse 200 4V.jpg',
+      '/images/hero2.jpeg',
+      '/images/hero3.avif',
+      '/images/hero4.jpg'
+    ]
   },
   {
     id: 22,
     name: 'Ather 450X',
     brand: 'Ather Energy',
     type: 'Scooter',
-    image: 'https://images.unsplash.com/photo-1669286438063-22f36ca6d5c5?q=80&w=2070&auto=format&fit=crop', // Placeholder
+    image: '/images/ather 450x.jpeg',
     price: 900,
     rating: 4.8,
     reviews: 350,
@@ -550,14 +685,20 @@ export const vehicles = [
       fuelTank: '3.7 kWh'
     },
     features: ['Google Maps', 'Touchscreen', 'Reverse Mode', 'AutoHold', 'Warp Mode'],
-    description: "The Super Scooter. Experience the future of urban commuting with intelligent features and rapid acceleration."
+    description: "The Super Scooter. Experience the future of urban commuting with intelligent features and rapid acceleration.",
+    images: [
+      '/images/ather 450x.jpeg',
+      '/images/ather2.avif',
+      '/images/ather3.avif',
+      '/images/ather4.avif'
+    ]
   },
   {
     id: 23,
     name: 'Ola S1 Pro',
     brand: 'Ola Electric',
     type: 'Scooter',
-    image: 'https://images.unsplash.com/photo-1675258380362-e616f7375677?q=80&w=1965&auto=format&fit=crop',
+    image: '/images/Ola S1 Pro.jpg',
     price: 850,
     rating: 4.3,
     reviews: 500,
@@ -575,14 +716,20 @@ export const vehicles = [
       fuelTank: '4 kWh'
     },
     features: ['Hyper Mode', 'Cruise Control', 'Music Playback', 'Digital Key', 'Voice Control'],
-    description: "#EndICEAge. The most powerful electric scooter with best-in-class range and performance."
+    description: "#EndICEAge. The most powerful electric scooter with best-in-class range and performance.",
+    images: [
+      '/images/Ola S1 Pro.jpg',
+      '/images/ola2.webp',
+      '/images/ola3.avif',
+      '/images/ola4.avif'
+    ]
   },
   {
     id: 24,
     name: 'Continental GT 650',
     brand: 'Royal Enfield',
     type: 'Bike',
-    image: 'https://images.unsplash.com/photo-1698375815349-93dd21bd505d?q=80&w=1964&auto=format&fit=crop',
+    image: '/images/Continental GT 650.webp',
     price: 1900,
     rating: 4.9,
     reviews: 280,
@@ -600,6 +747,12 @@ export const vehicles = [
       fuelTank: '12.5 L'
     },
     features: ['Twin Cylinder', 'Clip-on Bars', 'Cafe Racer Styling', 'Dual ABS', 'Slipper Clutch'],
-    description: "Ton of Fun. Relive the cafe racer culture with the powerful 650cc parallel twin engine."
+    description: "Ton of Fun. Relive the cafe racer culture with the powerful 650cc parallel twin engine.",
+    images: [
+      '/images/Continental GT 650.webp',
+      '/images/gt2.webp',
+      '/images/gt3.jpg',
+      '/images/gt5.jpg'
+    ]
   }
 ];

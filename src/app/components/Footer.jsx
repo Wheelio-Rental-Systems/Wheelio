@@ -29,7 +29,7 @@ const Footer = ({ onNavigate }) => {
                             <li><button onClick={() => onNavigate('about')} className="text-gray-400 hover:text-primary transition-colors text-left text-sm">About Wheelio</button></li>
                             <li><button onClick={() => onNavigate('vehicles')} className="text-gray-400 hover:text-primary transition-colors text-left text-sm">Our Fleet</button></li>
                             <li><button onClick={() => onNavigate('testimonials')} className="text-gray-400 hover:text-primary transition-colors text-left text-sm">Testimonials</button></li>
-                            <li><button onClick={() => onNavigate('careers')} className="text-gray-400 hover:text-primary transition-colors text-left text-sm">Careers</button></li>
+
                         </ul>
                     </div>
 
@@ -40,7 +40,7 @@ const Footer = ({ onNavigate }) => {
                             <li><button onClick={() => onNavigate('help')} className="text-gray-400 hover:text-primary transition-colors text-left text-sm">Help Center</button></li>
                             <li><button onClick={() => onNavigate('terms')} className="text-gray-400 hover:text-primary transition-colors text-left text-sm">Terms & Conditions</button></li>
                             <li><button onClick={() => onNavigate('privacy')} className="text-gray-400 hover:text-primary transition-colors text-left text-sm">Privacy Policy</button></li>
-                            <li><button onClick={() => onNavigate('contact')} className="text-gray-400 hover:text-primary transition-colors text-left text-sm">Contact Us</button></li>
+
                         </ul>
                     </div>
 
