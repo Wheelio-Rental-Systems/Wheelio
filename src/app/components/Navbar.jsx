@@ -5,7 +5,7 @@ const Navbar = ({ onNavigate, currentView, user, onLogout }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const navLinks = [
-        { name: 'Admin', id: 'admin-login' },
+        ...(user ? [] : [{ name: 'Admin', id: 'admin-login' }]), // Only show Admin login if not logged in
         { name: 'Home', id: 'home' },
         { name: 'Vehicles', id: 'vehicles' },
         { name: 'Become a Host', id: 'become-host' },

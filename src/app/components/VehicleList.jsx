@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import VehicleCard from './VehicleCard';
 import { toast } from 'sonner';
 import { Filter } from 'lucide-react';
-import { vehicles } from '../data/vehicles';
 import { VehicleDetailsDialog } from './VehicleDetailsDialog';
 
-const VehicleList = ({ onBook, user }) => {
+const VehicleList = ({ onBook, user, vehicles = [] }) => {
     // State for advanced filters
     const [filters, setFilters] = useState({
         type: 'all',

@@ -3,8 +3,41 @@ import { LayoutDashboard, Calendar, ClipboardCheck, Tag, Plus, CheckCircle, XCir
 import CancelRideDialog from './CancelRideDialog';
 import ExtendTripDialog from './ExtendTripDialog';
 
-const AdminDashboard = ({ onNavigate }) => {
+const AdminDashboard = ({ onNavigate, onAddVehicle }) => {
     const [activeTab, setActiveTab] = useState('bookings');
+
+    // New Vehicle Form State
+    const [newVehicle, setNewVehicle] = useState({
+        name: '', brand: '', type: 'Car', price: '', location: '', rating: '4.5',
+        details: { mileage: '', engine: '', power: '', topSpeed: '', fuelTank: '' },
+        features: '', description: '',
+        images: ['', '', '', ''] // 4 Image URLs
+    });
+
+    const handleVehicleSubmit = (e) => {
+        e.preventDefault();
+        const vehicleData = {
+            ...newVehicle,
+            id: Date.now(),
+            price: parseInt(newVehicle.price),
+            rating: parseFloat(newVehicle.rating),
+            features: newVehicle.features.split(',').map(f => f.trim()),
+            image: newVehicle.images[0] || '/images/swift.jpeg', // Default or first image
+            reviews: 0,
+            status: 'available',
+            seats: 5, // Default
+            fuelType: 'Petrol', // Default or add input
+            transmission: 'Manual', // Default or add input
+        };
+        onAddVehicle(vehicleData);
+        alert('Vehicle added to fleet successfully!');
+        setNewVehicle({
+            name: '', brand: '', type: 'Car', price: '', location: '', rating: '4.5',
+            details: { mileage: '', engine: '', power: '', topSpeed: '', fuelTank: '' },
+            features: '', description: '',
+            images: ['', '', '', '']
+        });
+    };
 
     // Bookings State
     const [bookings, setBookings] = useState([]);
@@ -46,9 +79,14 @@ const AdminDashboard = ({ onNavigate }) => {
 
 
     const updateHostRequestStatus = (id, newStatus) => {
-        const updatedRequests = hostRequests.map(req =>
-            req.id === id ? { ...req, status: newStatus } : req
-        );
+        let updatedRequests;
+        if (newStatus === 'Rejected') {
+            updatedRequests = hostRequests.filter(req => req.id !== id);
+        } else {
+            updatedRequests = hostRequests.map(req =>
+                req.id === id ? { ...req, status: newStatus } : req
+            );
+        }
         setHostRequests(updatedRequests);
         localStorage.setItem('hostRequests', JSON.stringify(updatedRequests));
     };
@@ -146,6 +184,13 @@ const AdminDashboard = ({ onNavigate }) => {
                     >
                         <Calendar size={18} />
                         Bookings
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('fleet')}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${activeTab === 'fleet' ? 'bg-primary text-black font-bold shadow-lg shadow-primary/20' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                    >
+                        <Car size={18} />
+                        Fleet Management
                     </button>
                     <button
                         onClick={() => setActiveTab('inspections')}

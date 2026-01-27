@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import { Lock, Mail, ArrowRight, ShieldAlert } from 'lucide-react';
 
-const AdminLogin = ({ onLogin, onNavigate }) => {
+const AdminLogin = ({ onLogin, onNavigate, user }) => {
+
+    React.useEffect(() => {
+        if (user) {
+            // If already logged in (as user or admin), redirect to avoid conflict
+            onNavigate('home');
+        }
+    }, [user, onNavigate]);
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -110,3 +118,4 @@ const AdminLogin = ({ onLogin, onNavigate }) => {
 };
 
 export default AdminLogin;
+

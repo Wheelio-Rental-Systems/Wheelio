@@ -15,6 +15,7 @@ import HostVehicleForm from './components/HostVehicleForm'; // New import
 import AdminLogin from './components/AdminLogin'; // New import
 import AdminDashboard from './components/AdminDashboard'; // New import
 import { Toaster } from 'sonner'; // Ensure sonner is installed or handle if missing
+import { vehicles as staticVehicles } from './data/vehicles'; // Import static vehicles
 
 const App = () => {
   // State for Navigation
@@ -22,6 +23,26 @@ const App = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [userBookings, setUserBookings] = useState([]); // Store bookings here
   const [user, setUser] = useState(null); // Initial state is logged out
+
+  // Vehicle State (Lifted from VehicleList)
+  const [allVehicles, setAllVehicles] = useState([]);
+
+  useEffect(() => {
+    // Initialize vehicles from localStorage or static data
+    const storedVehicles = JSON.parse(localStorage.getItem('allVehicles'));
+    if (storedVehicles && storedVehicles.length > 0) {
+      setAllVehicles(storedVehicles);
+    } else {
+      setAllVehicles(staticVehicles);
+      localStorage.setItem('allVehicles', JSON.stringify(staticVehicles));
+    }
+  }, []);
+
+  const handleAddVehicle = (newVehicle) => {
+    const updatedVehicles = [newVehicle, ...allVehicles];
+    setAllVehicles(updatedVehicles);
+    localStorage.setItem('allVehicles', JSON.stringify(updatedVehicles));
+  };
 
   const handleLogin = (userData) => {
     setUser(userData);
@@ -57,10 +78,17 @@ const App = () => {
       id: Date.now(),
       date: new Date().toLocaleDateString(),
       status: 'Upcoming',
-      cost: '₹' + (bookingData.vehicle.price * 1.05 + 96).toFixed(0) // Approximate cost calc from dialog
+      cost: '₹' + (bookingData.vehicle.price * 1.05 + 96).toFixed(0), // Approximate cost calc from dialog
+      userName: user ? user.name : 'Guest User', // Add user name for Admin Dashboard
+      vehicleName: bookingData.vehicle.name // Ensure vehicle name is accessible
     };
 
     setUserBookings(prev => [newBooking, ...prev]);
+
+    // Sync with localStorage for Admin Dashboard
+    const existingAllBookings = JSON.parse(localStorage.getItem('allBookings') || '[]');
+    localStorage.setItem('allBookings', JSON.stringify([newBooking, ...existingAllBookings]));
+
     setSelectedVehicle(null);
     handleNavigate('dashboard'); // Redirect to dashboard to see the booking
   };
@@ -98,7 +126,7 @@ const App = () => {
         )}
 
         {currentView === 'vehicles' && (
-          <VehicleList onBook={handleBookVehicle} user={user} />
+          <VehicleList onBook={handleBookVehicle} user={user} vehicles={allVehicles} />
         )}
 
         {currentView === 'booking' && selectedVehicle && (
@@ -131,7 +159,7 @@ const App = () => {
 
         {/* Admin Routes */}
         {currentView === 'admin-login' && <AdminLogin onNavigate={handleNavigate} onLogin={handleLogin} />}
-        {currentView === 'admin-dashboard' && <AdminDashboard onNavigate={handleNavigate} />}
+        {currentView === 'admin-dashboard' && <AdminDashboard onNavigate={handleNavigate} vehicles={allVehicles} onAddVehicle={handleAddVehicle} />}
 
       </main>
 
