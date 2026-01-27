@@ -22,6 +22,7 @@ const App = () => {
   const [currentView, setCurrentView] = useState('home');
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [userBookings, setUserBookings] = useState([]); // Store bookings here
+  const [allBookings, setAllBookings] = useState([]); // Global bookings state for Admin
   const [user, setUser] = useState(null); // Initial state is logged out
 
   // Vehicle State (Lifted from VehicleList)
@@ -36,10 +37,31 @@ const App = () => {
       setAllVehicles(staticVehicles);
       localStorage.setItem('allVehicles', JSON.stringify(staticVehicles));
     }
+
+    // Initialize bookings from localStorage
+    const storedBookings = JSON.parse(localStorage.getItem('allBookings') || '[]');
+    setAllBookings(storedBookings);
+    // Note: userBookings might need to be filtered from allBookings based on logged in user in a real app
+    // For now we keep userBookings somewhat separate or we could sync them. 
+    // Let's rely on allBookings as the truth for Admin.
   }, []);
 
   const handleAddVehicle = (newVehicle) => {
     const updatedVehicles = [newVehicle, ...allVehicles];
+    setAllVehicles(updatedVehicles);
+    localStorage.setItem('allVehicles', JSON.stringify(updatedVehicles));
+  };
+
+  const handleDeleteVehicle = (vehicleId) => {
+    const updatedVehicles = allVehicles.filter(v => v.id !== vehicleId);
+    setAllVehicles(updatedVehicles);
+    localStorage.setItem('allVehicles', JSON.stringify(updatedVehicles));
+  };
+
+  const handleUpdateVehicle = (updatedVehicle) => {
+    const updatedVehicles = allVehicles.map(v =>
+      v.id === updatedVehicle.id ? updatedVehicle : v
+    );
     setAllVehicles(updatedVehicles);
     localStorage.setItem('allVehicles', JSON.stringify(updatedVehicles));
   };
@@ -85,9 +107,10 @@ const App = () => {
 
     setUserBookings(prev => [newBooking, ...prev]);
 
-    // Sync with localStorage for Admin Dashboard
-    const existingAllBookings = JSON.parse(localStorage.getItem('allBookings') || '[]');
-    localStorage.setItem('allBookings', JSON.stringify([newBooking, ...existingAllBookings]));
+    // Sync with global state and localStorage for Admin Dashboard
+    const updatedAllBookings = [newBooking, ...allBookings];
+    setAllBookings(updatedAllBookings);
+    localStorage.setItem('allBookings', JSON.stringify(updatedAllBookings));
 
     setSelectedVehicle(null);
     handleNavigate('dashboard'); // Redirect to dashboard to see the booking
@@ -159,7 +182,7 @@ const App = () => {
 
         {/* Admin Routes */}
         {currentView === 'admin-login' && <AdminLogin onNavigate={handleNavigate} onLogin={handleLogin} />}
-        {currentView === 'admin-dashboard' && <AdminDashboard onNavigate={handleNavigate} vehicles={allVehicles} onAddVehicle={handleAddVehicle} />}
+        {currentView === 'admin-dashboard' && <AdminDashboard onNavigate={handleNavigate} vehicles={allVehicles} bookings={allBookings} onAddVehicle={handleAddVehicle} onDeleteVehicle={handleDeleteVehicle} onUpdateVehicle={handleUpdateVehicle} />}
 
       </main>
 

@@ -8,7 +8,7 @@ const Navbar = ({ onNavigate, currentView, user, onLogout }) => {
         ...(user ? [] : [{ name: 'Admin', id: 'admin-login' }]), // Only show Admin login if not logged in
         { name: 'Home', id: 'home' },
         { name: 'Vehicles', id: 'vehicles' },
-        { name: 'Become a Host', id: 'become-host' },
+        ...(user?.role === 'admin' ? [] : [{ name: 'Become a Host', id: 'become-host' }]),
     ];
 
     const handleNavClick = (viewId) => {
@@ -80,27 +80,50 @@ const Navbar = ({ onNavigate, currentView, user, onLogout }) => {
                                     {isOpen && (
                                         <div className="absolute right-0 mt-4 w-60 bg-[#151520] border border-white/10 rounded-2xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                                             <div className="p-2 space-y-1">
-                                                <button
-                                                    onClick={() => handleNavClick('dashboard')}
-                                                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left"
-                                                >
-                                                    <LayoutDashboard size={18} />
-                                                    My Dashboard
-                                                </button>
-                                                <button
-                                                    onClick={() => handleNavClick('dashboard')}
-                                                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left"
-                                                >
-                                                    <CreditCard size={18} />
-                                                    Payments
-                                                </button>
-                                                <button
-                                                    onClick={() => handleNavClick('dashboard')}
-                                                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left"
-                                                >
-                                                    <Settings size={18} />
-                                                    Settings
-                                                </button>
+                                                {user.role === 'admin' ? (
+                                                    // Admin Dropdown Items
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleNavClick('admin-dashboard')}
+                                                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left"
+                                                        >
+                                                            <LayoutDashboard size={18} />
+                                                            Admin Dashboard
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleNavClick('admin-dashboard')} // Or specific settings tab
+                                                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left"
+                                                        >
+                                                            <Settings size={18} />
+                                                            Global Settings
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    // Regular User Dropdown Items
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleNavClick('dashboard')}
+                                                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left"
+                                                        >
+                                                            <LayoutDashboard size={18} />
+                                                            My Dashboard
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleNavClick('dashboard')}
+                                                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left"
+                                                        >
+                                                            <CreditCard size={18} />
+                                                            Payments
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleNavClick('dashboard')}
+                                                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left"
+                                                        >
+                                                            <Settings size={18} />
+                                                            Settings
+                                                        </button>
+                                                    </>
+                                                )}
                                                 <div className="h-px bg-white/10 my-1"></div>
                                                 <button
                                                     onClick={() => {
