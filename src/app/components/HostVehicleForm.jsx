@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Upload, Car, MapPin, FileText, CheckCircle, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
-const HostVehicleForm = () => {
+const HostVehicleForm = ({ onNavigate, user }) => {
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
@@ -23,7 +23,12 @@ const HostVehicleForm = () => {
     const handleFileChange = (e, field) => {
         if (field === 'vehiclePhotos') {
             if (e.target.files && e.target.files.length > 0) {
-                setFormData({ ...formData, [field]: Array.from(e.target.files) });
+                // Limit to 5 photos
+                const files = Array.from(e.target.files).slice(0, 5);
+                setFormData({ ...formData, [field]: files });
+                if (e.target.files.length > 5) {
+                    toast.warning("Maximum 5 photos allowed");
+                }
             }
         } else if (e.target.files[0]) {
             setFormData({ ...formData, [field]: e.target.files[0] });
@@ -32,6 +37,11 @@ const HostVehicleForm = () => {
 
     const convertToBase64 = (file) => {
         return new Promise((resolve, reject) => {
+            // Check file size (limit to ~500KB for safety)
+            if (file.size > 500 * 1024) {
+                // We won't reject, but maybe we should warn? 
+                // actually let's just proceed and catch the storage error later
+            }
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = () => resolve(reader.result);
@@ -54,6 +64,8 @@ const HostVehicleForm = () => {
             const newRequest = {
                 id: 'HOST' + Date.now(),
                 ...formData,
+                userId: user?.email, // Link to user
+                userName: user?.name, // Store user name
                 license: licenseBase64, // Store base64 string
                 rcBook: rcBookBase64,   // Store base64 string
                 vehiclePhotos: vehiclePhotosBase64, // Store array of base64 strings
@@ -63,13 +75,44 @@ const HostVehicleForm = () => {
 
             // Save to localStorage
             const existingRequests = JSON.parse(localStorage.getItem('hostRequests') || '[]');
-            localStorage.setItem('hostRequests', JSON.stringify([newRequest, ...existingRequests]));
 
-            setTimeout(() => {
-                setIsSubmitting(false);
-                setStep('success');
-                toast.success("Vehicle Listed Successfully!");
-            }, 1000);
+            try {
+                localStorage.setItem('hostRequests', JSON.stringify([newRequest, ...existingRequests]));
+
+                setTimeout(() => {
+                    setIsSubmitting(false);
+                    setStep('success');
+                    toast.success("Vehicle Listed Successfully!");
+                }, 1000);
+
+            } catch (storageError) {
+                // Handle QuotaExceededError
+                if (storageError.name === 'QuotaExceededError' || storageError.code === 22) {
+                    console.warn("LocalStorage quota exceeded. Saving request without heavy images.");
+
+                    // Fallback: Save without images, using placeholders
+                    const lightRequest = {
+                        ...newRequest,
+                        license: null,
+                        rcBook: null,
+                        vehiclePhotos: [],
+                        notes: "Images were too large to save locally."
+                    };
+
+                    try {
+                        localStorage.setItem('hostRequests', JSON.stringify([lightRequest, ...existingRequests]));
+                        setIsSubmitting(false);
+                        setStep('success');
+                        toast.warning("Request submitted, but images were too large to save locally. Please allow extra time for verification.");
+                    } catch (retryError) {
+                        toast.error("Storage full. Please clear browser data.");
+                        setIsSubmitting(false);
+                    }
+                } else {
+                    throw storageError;
+                }
+            }
+
         } catch (error) {
             console.error("Error submitting form:", error);
             toast.error("Failed to submit. Please try again.");
@@ -153,6 +196,7 @@ const HostVehicleForm = () => {
                                         {formData.rcBook ? (
                                             <div className="text-green-500 flex items-center gap-2 font-bold">
                                                 <CheckCircle size={20} /> Uploaded: {formData.rcBook.name}
+                                                <span className="text-xs text-gray-400">({(formData.rcBook.size / 1024).toFixed(0)} KB)</span>
                                             </div>
                                         ) : (
                                             <>
@@ -176,6 +220,7 @@ const HostVehicleForm = () => {
                                         {formData.license ? (
                                             <div className="text-green-500 flex items-center gap-2 font-bold">
                                                 <CheckCircle size={20} /> Uploaded: {formData.license.name}
+                                                <span className="text-xs text-gray-400">({(formData.license.size / 1024).toFixed(0)} KB)</span>
                                             </div>
                                         ) : (
                                             <>
@@ -255,7 +300,7 @@ const HostVehicleForm = () => {
                         Thank you for listing your vehicle with Wheelio. Our verification team will contact you shortly at your registered email to complete the onboarding process.
                     </p>
                     <button
-                        onClick={() => window.location.href = '/'}
+                        onClick={() => onNavigate ? onNavigate('home') : window.location.href = '/'}
                         className="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-xl font-bold transition-colors"
                     >
                         Return Home

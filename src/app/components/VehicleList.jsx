@@ -16,10 +16,10 @@ const VehicleList = ({ onBook, user, vehicles = [] }) => {
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
 
-    // Extract unique values for dropdowns
-    const brands = ['all', ...new Set(vehicles.map(v => v.brand))];
-    const locations = ['all', ...new Set(vehicles.map(v => v.location))];
-    const types = ['all', 'Car', 'Bike', 'Scooter', 'SUV', 'Sedan'];
+    // Extract unique values for dropdowns and sort them alphabetically
+    const brands = ['all', ...Array.from(new Set(vehicles.map(v => v.brand))).sort()];
+    const locations = ['all', ...Array.from(new Set(vehicles.map(v => v.location))).sort()];
+    const types = ['all', 'Bike', 'Car', 'Scooter', 'Sedan', 'SUV'];
 
     const filteredVehicles = vehicles.filter(v => {
         // Type Filter (Handle "Cars" grouping)

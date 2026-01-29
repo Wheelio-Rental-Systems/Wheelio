@@ -102,6 +102,12 @@ const AddOns = ({ onNext, onBack, vehicle }) => {
                     Back
                 </button>
                 <button
+                    onClick={() => onNext([])}
+                    className="flex-1 py-4 rounded-xl border border-white/10 text-gray-400 font-bold hover:bg-white/5 hover:text-white transition-colors"
+                >
+                    Skip
+                </button>
+                <button
                     onClick={handleContinue}
                     className="flex-1 py-4 rounded-xl bg-primary text-black font-bold hover:bg-cyan-400 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
                 >

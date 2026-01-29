@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, ArrowLeft, ShieldCheck, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
@@ -8,6 +9,8 @@ const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
         startTime: '',
         endDate: '',
         endTime: '',
+        dropLocation: '',
+        dropTime: '',
         name: '',
         email: '',
         phone: ''
@@ -194,6 +197,37 @@ const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
                                 />
                             </div>
                             <p className="text-xs text-gray-500">Pick up your vehicle from this location</p>
+                        </div>
+
+                        {/* Drop Fields */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-300">Drop Location</label>
+                                <div className="relative">
+                                    <MapPin className="absolute left-3 top-3.5 text-gray-500 w-4 h-4" />
+                                    <input
+                                        type="text"
+                                        name="dropLocation"
+                                        placeholder="Enter drop location"
+                                        required
+                                        className="w-full bg-background border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white focus:ring-2 focus:ring-primary/50 outline-none placeholder:text-gray-500"
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-300">Drop Time</label>
+                                <div className="relative">
+                                    <Clock className="absolute left-3 top-3.5 text-gray-500 w-4 h-4" />
+                                    <input
+                                        type="time"
+                                        name="dropTime"
+                                        required
+                                        className="w-full bg-background border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white focus:ring-2 focus:ring-primary/50 outline-none [color-scheme:dark]"
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
                         </div>
 
                         <div className="space-y-4">

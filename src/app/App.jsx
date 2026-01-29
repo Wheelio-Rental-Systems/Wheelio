@@ -133,6 +133,11 @@ const App = () => {
     setIsSupportOpen(true);
   };
 
+  const handleUpdateUser = (updatedData) => {
+    setUser(prev => ({ ...prev, ...updatedData }));
+    toast.success("Profile updated successfully!");
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 font-sans">
       <Toaster position="top-right" theme="dark" />
@@ -162,7 +167,7 @@ const App = () => {
 
         {/* New Route for Host Form */}
         {currentView === 'become-host' && (
-          <HostVehicleForm />
+          <HostVehicleForm onNavigate={handleNavigate} user={user} />
         )}
 
         {/* New Route for Damage Report */}
@@ -178,7 +183,7 @@ const App = () => {
         {currentView === 'privacy' && <Privacy />}
         {currentView === 'contact' && <Contact />}
         {currentView === 'login' && <Login onNavigate={handleNavigate} onLogin={handleLogin} />}
-        {currentView === 'dashboard' && <Dashboard onNavigate={handleNavigate} bookings={userBookings} user={user} onUpdateBooking={handleUpdateBooking} onCancelBooking={handleCancelBooking} />}
+        {currentView === 'dashboard' && <Dashboard onNavigate={handleNavigate} bookings={userBookings} user={user} onUpdateUser={handleUpdateUser} onUpdateBooking={handleUpdateBooking} onCancelBooking={handleCancelBooking} />}
 
         {/* Admin Routes */}
         {currentView === 'admin-login' && <AdminLogin onNavigate={handleNavigate} onLogin={handleLogin} />}

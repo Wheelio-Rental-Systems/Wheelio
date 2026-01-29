@@ -1,53 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, CreditCard, LayoutDashboard, Clock, LogOut, Car, Calendar, MapPin, Shield, CheckCircle, AlertTriangle, Bell, Lock, Globe, ChevronRight, FileText, Download, FileCheck } from 'lucide-react';
 import CancelRideDialog from './CancelRideDialog';
 import ExtendTripDialog from './ExtendTripDialog';
 
-
-const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelBooking }) => {
+const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelBooking, onUpdateUser }) => {
     const [activeTab, setActiveTab] = useState('overview');
+    const [hostedVehicles, setHostedVehicles] = useState([]);
+    const [profileData, setProfileData] = useState({
+        name: user?.name || '',
+        phone: '+91 98765 43210',
+        city: 'Coimbatore'
+    });
 
-    // Settings Sub-view State
-    // Documents & Billing State
-    // Using mock data based on user prop or defaults
+    useEffect(() => {
+        if (user) {
+            setProfileData(prev => ({ ...prev, name: user.name }));
+        }
+    }, [user]);
+
+    useEffect(() => {
+        const fetchHostedVehicles = () => {
+            const allRequests = JSON.parse(localStorage.getItem('hostRequests') || '[]');
+            if (user?.email) {
+                const userRequests = allRequests.filter(req => req.userId === user.email);
+                setHostedVehicles(userRequests);
+            }
+        };
+        fetchHostedVehicles();
+    }, [user]);
+
+    const handleProfileUpdate = () => {
+        if (onUpdateUser) {
+            onUpdateUser({ name: profileData.name });
+            alert("Profile updated successfully!");
+        }
+    };
+
     const documents = {
         license: { status: 'Verified', url: '/images/license_mock.jpg', number: 'TN-37-2023014589', expiry: '12/2035' },
         aadhaar: { status: 'Verified', url: '/images/aadhaar_mock.jpg', number: '4589 8895 1256', expiry: 'N/A' }
     };
 
-    const [expandedFaq, setExpandedFaq] = useState(null);
     const [userDamageReports, setUserDamageReports] = useState([]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const storedReports = JSON.parse(localStorage.getItem('damageReports') || '[]');
-        // Filter for current user if user prop is present and has email, else for demo show all or none
-        // For this demo, let's show all since we are simulating the same browser session
         if (user && user.email) {
             setUserDamageReports(storedReports.filter(r => r.userId === user.email));
         } else {
-            // Fallback for unauth user viewing demo dashboard or just empty
             setUserDamageReports(storedReports);
         }
     }, [user]);
 
-    const handlePasswordUpdate = () => {
-        if (passwordForm.new !== passwordForm.confirm) {
-            alert("New passwords do not match!");
-            return;
-        }
-        if (!passwordForm.current || !passwordForm.new) {
-            alert("Please fill in all fields.");
-            return;
-        }
-        // Simulate API call
-        setTimeout(() => {
-            setPasswordSuccess(true);
-            setPasswordForm({ current: '', new: '', confirm: '' });
-        }, 500);
-    };
-
-
-    // Use passed user prop or fallback to empty object to prevent errors
     const mockUser = user || {
         name: 'Guest',
         email: 'guest@example.com',
@@ -55,8 +59,6 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
         licenseVerified: false
     };
 
-    // Combine passed bookings with any other logic if needed, but for now just use props
-    // Only show "Active Rental" if there is actually a booking
     const activeRental = bookings.length > 0 ? {
         vehicle: bookings[0].vehicle.name,
         image: bookings[0].vehicle.image,
@@ -74,11 +76,14 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
         image: b.vehicle.image
     }));
 
-    // State for toggles
-    const [notifications, setNotifications] = useState(true);
-    const [twoFactor, setTwoFactor] = useState(false);
+    const invoices = allBookings.map((b, i) => ({
+        id: `INV-${2024001 + i}`,
+        date: b.date && b.date.includes(' ') ? b.date.split(' ')[0] : (b.date || new Date().toLocaleDateString()),
+        amount: b.cost,
+        vehicle: b.vehicleName || b.vehicle,
+        status: b.status === 'Cancelled' ? 'Refunded' : 'Paid'
+    }));
 
-    // Dialog States
     const [isCancelOpen, setIsCancelOpen] = useState(false);
     const [isExtendOpen, setIsExtendOpen] = useState(false);
     const [bookingToCancel, setBookingToCancel] = useState(null);
@@ -89,7 +94,6 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
     };
 
     const handleConfirmCancel = (data) => {
-        console.log("Ride Cancelled:", data);
         if (onCancelBooking && bookingToCancel) {
             onCancelBooking(bookingToCancel);
         }
@@ -101,17 +105,9 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
     };
 
     const handleConfirmExtend = (data) => {
-        console.log("Trip Extended:", data);
         if (onUpdateBooking && bookings.length > 0) {
-            // Calculate new date range string
-            // Current dates: "22/01/2026 - 25/01/2026" or similar
-            // This is a rough estimation for demo purposes
             const currentBooking = bookings[0];
             const newEndDate = data.newEndDate || "Extended";
-
-            // Assuming date format is kept in 'date' field as a string mostly
-            // We just append " (Extended)" for visual feedback in this demo if parsing is hard
-
             onUpdateBooking({
                 id: currentBooking.id,
                 date: `${currentBooking.date.split(' to ')[0]} to ${newEndDate}`,
@@ -119,15 +115,8 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                 status: 'Extended'
             });
         }
+        setIsExtendOpen(false);
     };
-
-    // Removed placeholder handlers to avoid conflicts
-
-    const ChevronLeft = ({ size = 24, className = "" }) => (
-        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-            <path d="m15 18-6-6 6-6" />
-        </svg>
-    );
 
     const renderDocuments = () => (
         <div className="space-y-6 animate-in slide-in-from-right duration-300">
@@ -149,17 +138,12 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                             <CheckCircle size={12} /> Verified
                         </span>
                     </div>
-
                     <div className="aspect-video bg-black/40 rounded-xl mb-4 overflow-hidden border border-white/5 relative group-hover:border-primary/20 transition-colors">
-                        {/* Mock Image Representation */}
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
                             <FileCheck size={48} className="mb-2 opacity-20" />
                             <span className="text-xs uppercase tracking-widest font-bold opacity-40">Preview</span>
                         </div>
-                        {/* If we had a real image url from user input, we would show it here */}
-                        {/* <img src={documents.license.url} alt="License" className="w-full h-full object-cover" /> */}
                     </div>
-
                     <div className="flex justify-between items-center pt-4 border-t border-white/5">
                         <div className="text-sm text-gray-400 font-mono">{documents.license.number}</div>
                         <button className="text-primary text-sm font-bold hover:underline flex items-center gap-1">
@@ -184,14 +168,12 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                             <CheckCircle size={12} /> Verified
                         </span>
                     </div>
-
                     <div className="aspect-video bg-black/40 rounded-xl mb-4 overflow-hidden border border-white/5 relative group-hover:border-cyan-500/20 transition-colors">
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
                             <FileCheck size={48} className="mb-2 opacity-20" />
                             <span className="text-xs uppercase tracking-widest font-bold opacity-40">Preview</span>
                         </div>
                     </div>
-
                     <div className="flex justify-between items-center pt-4 border-t border-white/5">
                         <div className="text-sm text-gray-400 font-mono">{documents.aadhaar.number}</div>
                         <button className="text-cyan-400 text-sm font-bold hover:underline flex items-center gap-1">
@@ -203,88 +185,120 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
         </div>
     );
 
-    const renderBilling = () => {
-        // Generate Invoices from Bookings
-        const invoices = allBookings.map((b, i) => ({
-            id: `INV-${2024001 + i}`,
-            date: b.date.split(' ')[0] || new Date().toLocaleDateString(), // Approx date
-            amount: b.cost,
-            vehicle: b.vehicle,
-            status: b.status === 'Cancelled' ? 'Refunded' : 'Paid'
-        }));
-
-        return (
-            <div className="space-y-6 animate-in slide-in-from-right duration-300">
-                <h2 className="text-2xl font-bold text-white">Billing & Invoices</h2>
-
-                {/* Billing Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-secondary/20 border border-white/5 rounded-2xl p-6">
-                        <p className="text-gray-400 text-sm mb-1">Total Spent</p>
-                        <h3 className="text-2xl font-bold text-white">
-                            ₹{invoices.filter(i => i.status === 'Paid').reduce((acc, curr) => acc + parseInt(curr.amount.replace(/\D/g, '') || 0), 0).toLocaleString()}
-                        </h3>
-                    </div>
-                    <div className="bg-secondary/20 border border-white/5 rounded-2xl p-6">
-                        <p className="text-gray-400 text-sm mb-1">Last Payment</p>
-                        <h3 className="text-2xl font-bold text-white">{invoices[0]?.amount || '₹0'}</h3>
-                        <p className="text-xs text-green-500 mt-1">Paid on {invoices[0]?.date || '---'}</p>
-                    </div>
-                    <div className="bg-secondary/20 border border-white/5 rounded-2xl p-6 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors">
-                        <div>
-                            <p className="text-gray-400 text-sm">Payment Method</p>
-                            <h3 className="text-white font-bold text-lg mt-1">**** 4589</h3>
-                        </div>
-                        <CreditCard size={24} className="text-gray-400" />
-                    </div>
-                </div>
-
-                <div className="bg-secondary/20 border border-white/5 rounded-2xl overflow-hidden">
-                    <div className="p-6 border-b border-white/5">
-                        <h3 className="text-white font-bold">Payment History</h3>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="border-b border-white/5 bg-black/20 text-gray-400 text-sm">
-                                    <th className="p-4 font-medium">Invoice ID</th>
-                                    <th className="p-4 font-medium">Date</th>
-                                    <th className="p-4 font-medium">Vehicle</th>
-                                    <th className="p-4 font-medium">Amount</th>
-                                    <th className="p-4 font-medium">Status</th>
-                                    <th className="p-4 font-medium text-right">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody className="text-sm">
-                                {invoices.length > 0 ? invoices.map((invoice, idx) => (
-                                    <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                        <td className="p-4 font-mono text-gray-300">{invoice.id}</td>
-                                        <td className="p-4 text-gray-300">{invoice.date}</td>
-                                        <td className="p-4 text-white font-medium">{invoice.vehicle}</td>
-                                        <td className="p-4 text-white font-bold">{invoice.amount}</td>
-                                        <td className="p-4">
-                                            <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${invoice.status === 'Paid' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-                                                {invoice.status}
-                                            </span>
-                                        </td>
-                                        <td className="p-4 text-right">
-                                            <button className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
-                                                <Download size={16} />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                )) : (
-                                    <tr>
-                                        <td colSpan="6" className="p-8 text-center text-gray-500">No invoices found.</td>
-                                    </tr>
+    const renderHostedVehicles = () => (
+        <div className="space-y-6 animate-in slide-in-from-right duration-300 pointer-events-auto">
+            <h2 className="text-2xl font-bold text-white">My Hosted Vehicles</h2>
+            {hostedVehicles.length > 0 ? (
+                <div className="space-y-4">
+                    {hostedVehicles.map((vehicle, i) => (
+                        <div key={i} className="bg-secondary/20 border border-white/5 rounded-2xl p-4 flex flex-col md:flex-row items-center gap-6 hover:bg-secondary/30 transition-colors">
+                            <div className="w-full md:w-32 h-24 rounded-xl overflow-hidden shrink-0 bg-black/40 flex items-center justify-center">
+                                {vehicle.vehiclePhotos && vehicle.vehiclePhotos.length > 0 ? (
+                                    <img src={vehicle.vehiclePhotos[0]} alt={vehicle.model} className="w-full h-full object-cover" />
+                                ) : (
+                                    <Car size={32} className="text-gray-600" />
                                 )}
-                            </tbody>
-                        </table>
+                            </div>
+                            <div className="flex-1 w-full text-center md:text-left">
+                                <h4 className="text-lg font-bold text-white">{vehicle.make} {vehicle.model} ({vehicle.year})</h4>
+                                <div className="text-gray-400 text-sm mt-1">{vehicle.location}</div>
+                            </div>
+                            <div className="text-right flex flex-row md:flex-col justify-between w-full md:w-auto items-center md:items-end">
+                                <span className={`px-3 py-1 rounded-lg text-xs font-bold uppercase border ${vehicle.status === 'Approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'}`}>
+                                    {vehicle.status || 'Pending'}
+                                </span>
+                                <div className="text-xs text-gray-500 mt-2">
+                                    Submitted: {new Date(vehicle.submittedAt).toLocaleDateString()}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="bg-secondary/20 border border-white/5 rounded-3xl p-12 text-center text-gray-400">
+                    <Car size={48} className="mx-auto mb-4 text-gray-600" />
+                    <h3 className="text-xl font-bold text-white mb-2">No Hosted Vehicles</h3>
+                    <p className="mb-6">You haven't listed any vehicles yet.</p>
+                    <button
+                        onClick={() => onNavigate('become-host')}
+                        className="bg-primary text-black px-6 py-2 rounded-xl font-bold hover:bg-cyan-400 transition-colors"
+                    >
+                        Become a Host
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+
+    const renderBilling = () => (
+        <div className="space-y-6 animate-in slide-in-from-right duration-300">
+            <h2 className="text-2xl font-bold text-white">Billing & Invoices</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-secondary/20 border border-white/5 rounded-2xl p-6">
+                    <p className="text-gray-400 text-sm mb-1">Total Spent</p>
+                    <h3 className="text-2xl font-bold text-white">
+                        ₹{invoices.filter(i => i.status === 'Paid').reduce((acc, curr) => acc + parseInt(curr.amount.replace(/\D/g, '') || 0), 0).toLocaleString()}
+                    </h3>
+                </div>
+                <div className="bg-secondary/20 border border-white/5 rounded-2xl p-6">
+                    <p className="text-gray-400 text-sm mb-1">Last Payment</p>
+                    <h3 className="text-2xl font-bold text-white">{invoices[0]?.amount || '₹0'}</h3>
+                    <p className="text-xs text-green-500 mt-1">Paid on {invoices[0]?.date || '---'}</p>
+                </div>
+                <div className="bg-secondary/20 border border-white/5 rounded-2xl p-6 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors">
+                    <div>
+                        <p className="text-gray-400 text-sm">Payment Method</p>
+                        <h3 className="text-white font-bold text-lg mt-1">**** 4589</h3>
                     </div>
+                    <CreditCard size={24} className="text-gray-400" />
                 </div>
             </div>
-        );
-    };
+
+            <div className="bg-secondary/20 border border-white/5 rounded-2xl overflow-hidden">
+                <div className="p-6 border-b border-white/5">
+                    <h3 className="text-white font-bold">Payment History</h3>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="border-b border-white/5 bg-black/20 text-gray-400 text-sm">
+                                <th className="p-4 font-medium">Invoice ID</th>
+                                <th className="p-4 font-medium">Date</th>
+                                <th className="p-4 font-medium">Vehicle</th>
+                                <th className="p-4 font-medium">Amount</th>
+                                <th className="p-4 font-medium">Status</th>
+                                <th className="p-4 font-medium text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody className="text-sm">
+                            {invoices.length > 0 ? invoices.map((invoice, idx) => (
+                                <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                    <td className="p-4 font-mono text-gray-300">{invoice.id}</td>
+                                    <td className="p-4 text-gray-300">{invoice.date}</td>
+                                    <td className="p-4 text-white font-medium">{invoice.vehicle}</td>
+                                    <td className="p-4 text-white font-bold">{invoice.amount}</td>
+                                    <td className="p-4">
+                                        <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${invoice.status === 'Paid' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                                            {invoice.status}
+                                        </span>
+                                    </td>
+                                    <td className="p-4 text-right">
+                                        <button className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
+                                            <Download size={16} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            )) : (
+                                <tr>
+                                    <td colSpan="6" className="p-8 text-center text-gray-500">No invoices found.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
 
     const menuItems = [
         { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -295,14 +309,12 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
     ];
 
     const handleLogout = () => {
-        // Clear auth state logic here
         onNavigate('home');
     };
 
     return (
         <div className="min-h-screen bg-background pt-24 pb-12 px-4 md:px-8 animate-in fade-in duration-500">
             <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
-
                 {/* Sidebar Navigation */}
                 <div className="lg:col-span-1 space-y-6">
                     {/* User Profile Card */}
@@ -354,7 +366,6 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
 
                 {/* Main Content Area */}
                 <div className="lg:col-span-3 space-y-8">
-
                     {/* OVERVIEW TAB */}
                     {activeTab === 'overview' && (
                         <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
@@ -448,39 +459,41 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                                     </button>
                                 </div>
                             )}
-                        </div>
-                    )}
 
-                    {/* Damage Reports Section - Overview */}
-                    {activeTab === 'overview' && userDamageReports.length > 0 && (
-                        <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                <AlertTriangle className="text-yellow-500" /> Damage Reports & Alerts
-                            </h3>
-                            <div className="grid gap-4 md:grid-cols-2">
-                                {userDamageReports.map((report) => (
-                                    <div key={report.id} className="bg-secondary/20 border border-white/5 rounded-2xl p-6 relative overflow-hidden group hover:border-primary/20 transition-all">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div>
-                                                <h4 className="font-bold text-white">Incident at {report.location}</h4>
-                                                <p className="text-xs text-gray-500">{new Date(report.submittedAt).toLocaleDateString()}</p>
-                                            </div>
-                                            <span className={`text-xs px-2 py-1 rounded-full font-bold uppercase ${report.status === 'Estimated' ? 'bg-orange-500/20 text-orange-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
-                                                {report.status}
-                                            </span>
-                                        </div>
-                                        <p className="text-sm text-gray-400 mb-4 line-clamp-2">{report.description}</p>
+                            {/* Hosted Vehicles Section in Overview */}
+                            {user?.email && renderHostedVehicles()}
 
-                                        {report.estimatedCost > 0 && (
-                                            <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl animate-pulse">
-                                                <p className="text-xs text-red-400 uppercase font-bold mb-1">Damage Assessment Cost</p>
-                                                <div className="text-2xl font-bold text-white">₹{report.estimatedCost}</div>
-                                                <p className="text-xs text-gray-400 mt-1">Please pay this amount to clear your dues.</p>
+                            {/* Damage Reports Section - Overview */}
+                            {userDamageReports.length > 0 && (
+                                <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
+                                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                        <AlertTriangle className="text-yellow-500" /> Damage Reports & Alerts
+                                    </h3>
+                                    <div className="grid gap-4 md:grid-cols-2">
+                                        {userDamageReports.map((report) => (
+                                            <div key={report.id} className="bg-secondary/20 border border-white/5 rounded-2xl p-6 relative overflow-hidden group hover:border-primary/20 transition-all">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div>
+                                                        <h4 className="font-bold text-white">Incident at {report.location}</h4>
+                                                        <p className="text-xs text-gray-500">{new Date(report.submittedAt).toLocaleDateString()}</p>
+                                                    </div>
+                                                    <span className={`text-xs px-2 py-1 rounded-full font-bold uppercase ${report.status === 'Estimated' ? 'bg-orange-500/20 text-orange-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
+                                                        {report.status}
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm text-gray-400 mb-4 line-clamp-2">{report.description}</p>
+                                                {report.estimatedCost > 0 && (
+                                                    <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl animate-pulse">
+                                                        <p className="text-xs text-red-400 uppercase font-bold mb-1">Damage Assessment Cost</p>
+                                                        <div className="text-2xl font-bold text-white">₹{report.estimatedCost}</div>
+                                                        <p className="text-xs text-gray-400 mt-1">Please pay this amount to clear your dues.</p>
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -518,7 +531,12 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="text-gray-400 text-sm">Full Name</label>
-                                        <input type="text" defaultValue={mockUser.name} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary outline-none" />
+                                        <input
+                                            type="text"
+                                            value={profileData.name}
+                                            onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary outline-none"
+                                        />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-gray-400 text-sm">Email Address</label>
@@ -534,7 +552,10 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                                     </div>
                                 </div>
                                 <div className="pt-6 border-t border-white/5">
-                                    <button className="bg-primary text-black px-8 py-3 rounded-xl font-bold hover:bg-cyan-400 transition-colors">
+                                    <button
+                                        onClick={handleProfileUpdate}
+                                        className="bg-primary text-black px-8 py-3 rounded-xl font-bold hover:bg-cyan-400 transition-colors"
+                                    >
                                         Save Changes
                                     </button>
                                 </div>
