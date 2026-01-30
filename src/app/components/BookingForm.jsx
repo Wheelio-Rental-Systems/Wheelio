@@ -21,8 +21,15 @@ const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
         rentalCost: vehicle.price,
         addOnsCost: 0,
         gst: 0,
+        adjustments: 0,
         total: 0
     });
+
+    // Helper to check for weekend (Fri, Sat, Sun)
+    const isWeekend = (date) => {
+        const day = date.getDay();
+        return day === 0 || day === 5 || day === 6;
+    };
 
     // Calculate costs whenever dates or addon props change
     useEffect(() => {
@@ -39,15 +46,58 @@ const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
             const addOnsTotalPerDay = bookingData?.addOns?.reduce((acc, curr) => acc + curr.price, 0) || 0;
             const addOnsCost = addOnsTotalPerDay * days;
 
-            const subTotal = rentalCost + addOnsCost;
+            // Calculate Pricing Adjustments
+            let pricingRules = [];
+            try {
+                pricingRules = JSON.parse(localStorage.getItem('pricingRules') || '[]');
+            } catch (e) {
+                pricingRules = [];
+            }
+            let adjustmentAmount = 0;
+            let activeAdjustments = [];
+
+            pricingRules.forEach(rule => {
+                if (rule.status !== 'active') return;
+
+                let applyRule = false;
+
+                if (rule.condition === 'weekend') {
+                    // Check if any day in the range is a weekend
+                    let current = new Date(start);
+                    while (current <= end) {
+                        if (isWeekend(current)) {
+                            applyRule = true;
+                            break;
+                        }
+                        current.setDate(current.getDate() + 1);
+                    }
+                } else if (rule.condition === 'advance_30') {
+                    const today = new Date();
+                    const diffTime = start - today;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    if (diffDays >= 30) applyRule = true;
+                } else if (rule.condition === 'holiday') {
+                    // Placeholder for holiday logic
+                }
+
+                if (applyRule) {
+                    const adjustment = (rentalCost * rule.value) / 100;
+                    adjustmentAmount += adjustment;
+                    activeAdjustments.push({ name: rule.name, amount: adjustment });
+                }
+            });
+
+            const subTotal = rentalCost + addOnsCost + adjustmentAmount;
             const gst = Math.round(subTotal * 0.18);
-            const total = subTotal + gst;
+            const total = Math.max(0, subTotal + gst);
 
             setCostBreakdown({
                 days,
                 rentalCost,
                 addOnsCost,
                 gst,
+                adjustments: adjustmentAmount,
+                activeAdjustments,
                 total
             });
         }
@@ -119,6 +169,18 @@ const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
                                 <span className="text-gray-400">Add-ons Cost</span>
                                 <span className="text-white">₹{costBreakdown.addOnsCost}</span>
                             </div>
+
+                            {/* Adjustments Display */}
+                            {costBreakdown.activeAdjustments && costBreakdown.activeAdjustments.map((adj, idx) => (
+                                <div key={idx} className="flex justify-between text-sm">
+                                    <span className={adj.amount < 0 ? "text-green-400" : "text-yellow-400"}>
+                                        {adj.name}
+                                    </span>
+                                    <span className={adj.amount < 0 ? "text-green-400" : "text-white"}>
+                                        {adj.amount > 0 ? '+' : ''}₹{Math.round(adj.amount)}
+                                    </span>
+                                </div>
+                            ))}
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-400">GST (18%)</span>
                                 <span className="text-white">₹{costBreakdown.gst}</span>

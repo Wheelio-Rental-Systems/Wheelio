@@ -11,7 +11,7 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
     }, 0);
 
     const activeBookingsCount = bookings.filter(b => b.status === 'Active' || b.status === 'Ongoing').length;
-    const utilizationRate = vehicles.length > 0 ? ((activeBookingsCount / vehicles.length) * 100).toFixed(1) : 0;
+    // Utilization Rate removed as per request
 
     const vehicleStatusCounts = {
         Available: vehicles.filter(v => v.status === 'available').length,
@@ -160,11 +160,18 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
     };
 
     // TASKS: Pricing Rules Data (Mock)
-    const [pricingRules, setPricingRules] = useState([
-        { id: 1, name: 'Weekend Surge', description: 'Friday-Sunday +20%', status: 'active' },
-        { id: 2, name: 'Holiday Special', description: 'Festival days +30%', status: 'active' },
-        { id: 3, name: 'Early Bird', description: '30 days advance -15%', status: 'inactive' },
-    ]);
+    const [pricingRules, setPricingRules] = useState(() => {
+        const saved = localStorage.getItem('pricingRules');
+        return saved ? JSON.parse(saved) : [
+            { id: 1, name: 'Weekend Deal', description: 'Friday-Sunday 10% Off', status: 'active', type: 'percentage', value: -10, condition: 'weekend' },
+            { id: 2, name: 'Holiday Special', description: 'Festival days +30%', status: 'active', type: 'percentage', value: 30, condition: 'holiday' },
+            { id: 3, name: 'Early Bird', description: '30 days advance -15%', status: 'inactive', type: 'percentage', value: -15, condition: 'advance_30' },
+        ];
+    });
+
+    useEffect(() => {
+        localStorage.setItem('pricingRules', JSON.stringify(pricingRules));
+    }, [pricingRules]);
 
     const toggleRuleStatus = (id) => {
         setPricingRules(prev => prev.map(rule =>
@@ -275,19 +282,7 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
                                     </p>
                                 </div>
 
-                                {/* Utilization Rate Card */}
-                                <div className="bg-[#1e1e2d] border border-white/5 rounded-2xl p-6 shadow-lg">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h3 className="text-gray-400 font-medium">Utilization Rate</h3>
-                                        <div className="p-3 bg-blue-500/10 rounded-xl text-blue-500">
-                                            <Car size={24} />
-                                        </div>
-                                    </div>
-                                    <h2 className="text-3xl font-bold text-white">{utilizationRate}%</h2>
-                                    <p className="text-sm text-blue-400 mt-2">
-                                        {activeBookingsCount} vehicles currently rented
-                                    </p>
-                                </div>
+                                {/* Utilization Rate Card Removed */}
 
                                 {/* Fleet Status Card */}
                                 <div className="bg-[#1e1e2d] border border-white/5 rounded-2xl p-6 shadow-lg">
@@ -680,12 +675,6 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
                         <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
                             <div className="flex justify-between items-center mb-6">
                                 <h3 className="text-xl font-bold text-white">Dynamic Pricing Rules</h3>
-                                <button
-                                    onClick={addNewRule}
-                                    className="flex items-center gap-2 px-4 py-2 bg-cyan-400 text-black font-bold rounded-xl hover:bg-cyan-300 transition-colors active:scale-95"
-                                >
-                                    <Plus size={18} /> Add Rule
-                                </button>
                             </div>
 
                             <div className="space-y-4">

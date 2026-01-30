@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, CreditCard, LayoutDashboard, Clock, LogOut, Car, Calendar, MapPin, Shield, CheckCircle, AlertTriangle, Bell, Lock, Globe, ChevronRight, FileText, Download, FileCheck } from 'lucide-react';
+import { User, CreditCard, LayoutDashboard, Clock, LogOut, Car, Calendar, MapPin, Shield, CheckCircle, AlertTriangle, Bell, Lock, Globe, ChevronRight, FileText, Download, FileCheck, Camera } from 'lucide-react';
 import CancelRideDialog from './CancelRideDialog';
 import ExtendTripDialog from './ExtendTripDialog';
 
@@ -9,18 +9,47 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
     const [profileData, setProfileData] = useState({
         name: user?.name || '',
         phone: '+91 98765 43210',
-        city: 'Coimbatore'
+        city: 'Coimbatore',
+        documents: {}
     });
+
+    const [profileImage, setProfileImage] = useState(() => {
+        return localStorage.getItem('userProfileImage') || null;
+    });
+
+    const handleProfileImageUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const result = reader.result;
+                setProfileImage(result);
+                localStorage.setItem('userProfileImage', result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     useEffect(() => {
         if (user) {
-            setProfileData(prev => ({ ...prev, name: user.name }));
+            setProfileData(prev => ({
+                ...prev,
+                name: user.name || '',
+                phone: user.phone || '+91 98765 43210',
+                city: user.city || 'Coimbatore'
+            }));
         }
     }, [user]);
 
     useEffect(() => {
         const fetchHostedVehicles = () => {
-            const allRequests = JSON.parse(localStorage.getItem('hostRequests') || '[]');
+            let allRequests = [];
+            try {
+                allRequests = JSON.parse(localStorage.getItem('hostRequests') || '[]');
+            } catch (e) {
+                console.error("Error parsing hostRequests", e);
+                allRequests = [];
+            }
             if (user?.email) {
                 const userRequests = allRequests.filter(req => req.userId === user.email);
                 setHostedVehicles(userRequests);
@@ -31,20 +60,67 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
 
     const handleProfileUpdate = () => {
         if (onUpdateUser) {
-            onUpdateUser({ name: profileData.name });
-            alert("Profile updated successfully!");
+            onUpdateUser({
+                name: profileData.name,
+                phone: profileData.phone,
+                city: profileData.city
+            });
+            // Toast notification is handled in App.jsx
         }
     };
 
-    const documents = {
-        license: { status: 'Verified', url: '/images/license_mock.jpg', number: 'TN-37-2023014589', expiry: '12/2035' },
-        aadhaar: { status: 'Verified', url: '/images/aadhaar_mock.jpg', number: '4589 8895 1256', expiry: 'N/A' }
+    const [documents, setDocuments] = useState(() => {
+        try {
+            const saved = localStorage.getItem('userDocuments');
+            return saved ? JSON.parse(saved) : {
+                license: { status: 'Pending', url: null, number: '', expiry: '' },
+                aadhaar: { status: 'Pending', url: null, number: '', expiry: '' }
+            };
+        } catch (e) {
+            return {
+                license: { status: 'Pending', url: null, number: '', expiry: '' },
+                aadhaar: { status: 'Pending', url: null, number: '', expiry: '' }
+            };
+        }
+    });
+
+    useEffect(() => {
+        localStorage.setItem('userDocuments', JSON.stringify(documents));
+    }, [documents]);
+
+    const handleFileUpload = (type, event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setDocuments(prev => ({
+                    ...prev,
+                    [type]: {
+                        ...prev[type],
+                        status: 'Uploaded',
+                        url: reader.result,
+                        fileName: file.name
+                    }
+                }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeDocument = (type) => {
+        setDocuments(prev => ({
+            ...prev,
+            [type]: { ...prev[type], status: 'Pending', url: null, fileName: '' }
+        }));
     };
 
     const [userDamageReports, setUserDamageReports] = useState([]);
 
     useEffect(() => {
-        const storedReports = JSON.parse(localStorage.getItem('damageReports') || '[]');
+        let storedReports = [];
+        try {
+            storedReports = JSON.parse(localStorage.getItem('damageReports') || '[]');
+        } catch (e) { storedReports = []; }
         if (user && user.email) {
             setUserDamageReports(storedReports.filter(r => r.userId === user.email));
         } else {
@@ -131,24 +207,58 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                             </div>
                             <div>
                                 <h3 className="font-bold text-white text-lg">Driving License</h3>
-                                <p className="text-gray-400 text-sm">Valid until {documents.license.expiry}</p>
+                                <p className="text-gray-400 text-sm">Upload front side</p>
                             </div>
                         </div>
-                        <span className="px-3 py-1 bg-green-500/10 text-green-500 text-xs font-bold rounded-full border border-green-500/20 flex items-center gap-1">
-                            <CheckCircle size={12} /> Verified
-                        </span>
+                        {documents.license.status === 'Uploaded' && (
+                            <span className="px-3 py-1 bg-yellow-500/10 text-yellow-500 text-xs font-bold rounded-full border border-yellow-500/20 flex items-center gap-1">
+                                <Clock size={12} /> Pending Verification
+                            </span>
+                        )}
                     </div>
-                    <div className="aspect-video bg-black/40 rounded-xl mb-4 overflow-hidden border border-white/5 relative group-hover:border-primary/20 transition-colors">
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
-                            <FileCheck size={48} className="mb-2 opacity-20" />
-                            <span className="text-xs uppercase tracking-widest font-bold opacity-40">Preview</span>
+
+                    {documents.license.url ? (
+                        <div className="aspect-video bg-black/40 rounded-xl mb-4 overflow-hidden border border-white/5 relative group-hover:border-primary/20 transition-colors">
+                            <img src={documents.license.url} alt="License" className="w-full h-full object-cover" />
                         </div>
-                    </div>
+                    ) : (
+                        <div className="aspect-video bg-black/40 rounded-xl mb-4 overflow-hidden border border-white/5 border-dashed border-gray-700 flex flex-col items-center justify-center relative hover:bg-white/5 transition-colors">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                onChange={(e) => handleFileUpload('license', e)}
+                            />
+                            <div className="flex flex-col items-center text-gray-500">
+                                <FileText size={32} className="mb-2 opacity-50" />
+                                <span className="text-sm font-medium">Click to Upload</span>
+                                <span className="text-xs opacity-50 mt-1">JPG, PNG up to 5MB</span>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="flex justify-between items-center pt-4 border-t border-white/5">
-                        <div className="text-sm text-gray-400 font-mono">{documents.license.number}</div>
-                        <button className="text-primary text-sm font-bold hover:underline flex items-center gap-1">
-                            <Download size={16} /> Download
-                        </button>
+                        <div className="text-sm text-gray-400 font-mono truncate max-w-[150px]">
+                            {documents.license.fileName || 'No file selected'}
+                        </div>
+                        {documents.license.url ? (
+                            <button
+                                onClick={() => removeDocument('license')}
+                                className="text-red-400 text-sm font-bold hover:underline flex items-center gap-1"
+                            >
+                                <LogOut size={16} className="rotate-180" /> Remove
+                            </button>
+                        ) : (
+                            <label className="text-primary text-sm font-bold hover:underline flex items-center gap-1 cursor-pointer">
+                                <Download size={16} className="rotate-180" /> Upload
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => handleFileUpload('license', e)}
+                                />
+                            </label>
+                        )}
                     </div>
                 </div>
 
@@ -164,21 +274,55 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                                 <p className="text-gray-400 text-sm">Government Issued ID</p>
                             </div>
                         </div>
-                        <span className="px-3 py-1 bg-green-500/10 text-green-500 text-xs font-bold rounded-full border border-green-500/20 flex items-center gap-1">
-                            <CheckCircle size={12} /> Verified
-                        </span>
+                        {documents.aadhaar.status === 'Uploaded' && (
+                            <span className="px-3 py-1 bg-yellow-500/10 text-yellow-500 text-xs font-bold rounded-full border border-yellow-500/20 flex items-center gap-1">
+                                <Clock size={12} /> Pending Verification
+                            </span>
+                        )}
                     </div>
-                    <div className="aspect-video bg-black/40 rounded-xl mb-4 overflow-hidden border border-white/5 relative group-hover:border-cyan-500/20 transition-colors">
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
-                            <FileCheck size={48} className="mb-2 opacity-20" />
-                            <span className="text-xs uppercase tracking-widest font-bold opacity-40">Preview</span>
+
+                    {documents.aadhaar.url ? (
+                        <div className="aspect-video bg-black/40 rounded-xl mb-4 overflow-hidden border border-white/5 relative group-hover:border-cyan-500/20 transition-colors">
+                            <img src={documents.aadhaar.url} alt="Aadhar" className="w-full h-full object-cover" />
                         </div>
-                    </div>
+                    ) : (
+                        <div className="aspect-video bg-black/40 rounded-xl mb-4 overflow-hidden border border-white/5 border-dashed border-gray-700 flex flex-col items-center justify-center relative hover:bg-white/5 transition-colors">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                onChange={(e) => handleFileUpload('aadhaar', e)}
+                            />
+                            <div className="flex flex-col items-center text-gray-500">
+                                <FileText size={32} className="mb-2 opacity-50" />
+                                <span className="text-sm font-medium">Click to Upload</span>
+                                <span className="text-xs opacity-50 mt-1">JPG, PNG up to 5MB</span>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="flex justify-between items-center pt-4 border-t border-white/5">
-                        <div className="text-sm text-gray-400 font-mono">{documents.aadhaar.number}</div>
-                        <button className="text-cyan-400 text-sm font-bold hover:underline flex items-center gap-1">
-                            <Download size={16} /> Download
-                        </button>
+                        <div className="text-sm text-gray-400 font-mono truncate max-w-[150px]">
+                            {documents.aadhaar.fileName || 'No file selected'}
+                        </div>
+                        {documents.aadhaar.url ? (
+                            <button
+                                onClick={() => removeDocument('aadhaar')}
+                                className="text-red-400 text-sm font-bold hover:underline flex items-center gap-1"
+                            >
+                                <LogOut size={16} className="rotate-180" /> Remove
+                            </button>
+                        ) : (
+                            <label className="text-cyan-400 text-sm font-bold hover:underline flex items-center gap-1 cursor-pointer">
+                                <Download size={16} className="rotate-180" /> Upload
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => handleFileUpload('aadhaar', e)}
+                                />
+                            </label>
+                        )}
                     </div>
                 </div>
             </div>
@@ -319,10 +463,25 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                 <div className="lg:col-span-1 space-y-6">
                     {/* User Profile Card */}
                     <div className="bg-secondary/30 border border-white/5 rounded-3xl p-6 flex flex-col items-center text-center">
-                        <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-primary to-cyan-500 p-[2px] mb-4">
-                            <div className="w-full h-full rounded-full bg-black flex items-center justify-center overflow-hidden">
-                                <User size={40} className="text-gray-400" />
+                        <div className="relative group cursor-pointer">
+                            <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-primary to-cyan-500 p-[2px] mb-4">
+                                <div className="w-full h-full rounded-full bg-black flex items-center justify-center overflow-hidden relative">
+                                    {profileImage ? (
+                                        <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <User size={40} className="text-gray-400" />
+                                    )}
+                                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Camera size={24} className="text-white" />
+                                    </div>
+                                </div>
                             </div>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                onChange={handleProfileImageUpload}
+                            />
                         </div>
                         <h2 className="text-xl font-bold text-white">{mockUser.name}</h2>
                         <p className="text-sm text-gray-500 mb-2">{mockUser.email}</p>
@@ -544,11 +703,21 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-gray-400 text-sm">Phone Number</label>
-                                        <input type="tel" defaultValue="+91" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary outline-none" />
+                                        <input
+                                            type="tel"
+                                            value={profileData.phone}
+                                            onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary outline-none"
+                                        />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-gray-400 text-sm">City</label>
-                                        <input type="text" defaultValue="Coimbatore" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary outline-none" />
+                                        <input
+                                            type="text"
+                                            value={profileData.city}
+                                            onChange={(e) => setProfileData({ ...profileData, city: e.target.value })}
+                                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary outline-none"
+                                        />
                                     </div>
                                 </div>
                                 <div className="pt-6 border-t border-white/5">
@@ -564,9 +733,9 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                             <div className="bg-secondary/20 border border-white/5 rounded-2xl p-8">
                                 <h3 className="text-white font-bold mb-4">Driving License</h3>
                                 <div className="border-2 border-dashed border-green-500/30 bg-green-500/5 rounded-xl p-6 text-center">
-                                    <CheckCircle className="text-green-500 mx-auto mb-2" size={32} />
-                                    <p className="text-white font-medium">License Verified</p>
-                                    <p className="text-sm text-gray-500 mt-1">Ready for bookings</p>
+                                    <CheckCircle className={`mx-auto mb-2 ${documents.license.status === 'Verified' ? 'text-green-500' : 'text-gray-500'}`} size={32} />
+                                    <p className="text-white font-medium">{documents.license.status === 'Verified' ? 'License Verified' : 'License Status: ' + documents.license.status}</p>
+                                    <p className="text-sm text-gray-500 mt-1">{documents.license.status === 'Verified' ? 'Ready for bookings' : 'Upload your license in Documents tab'}</p>
                                 </div>
                             </div>
                         </div>

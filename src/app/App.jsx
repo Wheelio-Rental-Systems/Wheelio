@@ -14,7 +14,7 @@ import { SupportDialog } from './components/SupportDialog'; // New import
 import HostVehicleForm from './components/HostVehicleForm'; // New import
 import AdminLogin from './components/AdminLogin'; // New import
 import AdminDashboard from './components/AdminDashboard'; // New import
-import { Toaster } from 'sonner'; // Ensure sonner is installed or handle if missing
+import { Toaster, toast } from 'sonner'; // Ensure sonner is installed or handle if missing
 import { vehicles as staticVehicles } from './data/vehicles'; // Import static vehicles
 
 const App = () => {

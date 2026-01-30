@@ -36,7 +36,7 @@ const VehicleList = ({ onBook, user, vehicles = [] }) => {
         const ratingMatch = filters.rating === 'all' || v.rating >= parseFloat(filters.rating);
 
         return typeMatch && brandMatch && locationMatch && ratingMatch;
-    });
+    }).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
     const handleFilterChange = (key, value) => {
         setFilters(prev => ({ ...prev, [key]: value }));
