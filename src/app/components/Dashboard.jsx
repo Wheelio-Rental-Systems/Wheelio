@@ -8,7 +8,7 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
     const [hostedVehicles, setHostedVehicles] = useState([]);
     const [profileData, setProfileData] = useState({
         name: user?.name || '',
-        phone: '+91 98765 43210',
+        phone: '',
         city: 'Coimbatore',
         documents: {}
     });
@@ -35,7 +35,7 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
             setProfileData(prev => ({
                 ...prev,
                 name: user.name || '',
-                phone: user.phone || '+91 98765 43210',
+                phone: user.phone || '',
                 city: user.city || 'Coimbatore'
             }));
         }
@@ -459,9 +459,7 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
     return (
         <div className="min-h-screen bg-background pt-24 pb-12 px-4 md:px-8 animate-in fade-in duration-500">
             <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
-                {/* Sidebar Navigation */}
                 <div className="lg:col-span-1 space-y-6">
-                    {/* User Profile Card */}
                     <div className="bg-secondary/30 border border-white/5 rounded-3xl p-6 flex flex-col items-center text-center">
                         <div className="relative group cursor-pointer">
                             <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-primary to-cyan-500 p-[2px] mb-4">
@@ -496,7 +494,6 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                         )}
                     </div>
 
-                    {/* Navigation Menu */}
                     <div className="bg-secondary/30 border border-white/5 rounded-3xl p-4 space-y-1">
                         {menuItems.map((item) => (
                             <button
@@ -513,7 +510,6 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                         ))}
                     </div>
 
-                    {/* Logout Button */}
                     <button
                         onClick={handleLogout}
                         className="w-full flex items-center gap-3 px-6 py-4 rounded-2xl border border-red-500/20 text-red-500 hover:bg-red-500/10 transition-colors font-medium"
@@ -523,9 +519,7 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                     </button>
                 </div>
 
-                {/* Main Content Area */}
                 <div className="lg:col-span-3 space-y-8">
-                    {/* OVERVIEW TAB */}
                     {activeTab === 'overview' && (
                         <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -539,9 +533,9 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                                 >
                                     Book New Ride
                                 </button>
+
                             </div>
 
-                            {/* Active Rental Card */}
                             {activeRental ? (
                                 <div className="bg-gradient-to-br from-secondary/50 to-secondary/30 border border-white/10 rounded-3xl p-1 overflow-hidden">
                                     <div className="bg-black/40 rounded-[22px] p-6 md:p-8">
@@ -619,10 +613,8 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                                 </div>
                             )}
 
-                            {/* Hosted Vehicles Section in Overview */}
                             {user?.email && renderHostedVehicles()}
 
-                            {/* Damage Reports Section - Overview */}
                             {userDamageReports.length > 0 && (
                                 <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
                                     <h3 className="text-xl font-bold text-white flex items-center gap-2">
@@ -656,7 +648,6 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                         </div>
                     )}
 
-                    {/* BOOKINGS TAB */}
                     {activeTab === 'bookings' && (
                         <div className="space-y-6 animate-in slide-in-from-right duration-300">
                             <h2 className="text-2xl font-bold text-white">Ride History</h2>
@@ -682,7 +673,6 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                         </div>
                     )}
 
-                    {/* PROFILE TAB */}
                     {activeTab === 'profile' && (
                         <div className="space-y-6 animate-in slide-in-from-right duration-300">
                             <h2 className="text-2xl font-bold text-white">Profile Settings</h2>
@@ -741,15 +731,12 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                         </div>
                     )}
 
-                    {/* DOCUMENTS TAB */}
                     {activeTab === 'documents' && renderDocuments()}
 
-                    {/* BILLING TAB */}
                     {activeTab === 'billing' && renderBilling()}
                 </div>
             </div>
 
-            {/* Dialogs */}
             <CancelRideDialog
                 isOpen={isCancelOpen}
                 onClose={() => setIsCancelOpen(false)}
@@ -763,7 +750,7 @@ const Dashboard = ({ onNavigate, user, bookings = [], onUpdateBooking, onCancelB
                 onConfirm={handleConfirmExtend}
                 currentEndDate={activeRental?.dates}
             />
-        </div>
+        </div >
     );
 };
 

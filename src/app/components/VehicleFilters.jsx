@@ -3,7 +3,7 @@ import { Slider } from "./ui/slider";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 
-/* -------------------- CONSTANTS -------------------- */
+
 const CAR_CATEGORIES = ["Hatchback", "Sedan", "SUV", "Luxury", "Convertible"];
 const BIKE_CATEGORIES = ["Scooter", "Commuter", "Sports", "Cruiser", "Superbike"];
 
@@ -41,7 +41,7 @@ const BIKE_BRANDS = [
 export const MAX_PRICE = 5000;
 const inr = (v) => `₹${v}`;
 
-/* -------------------- COMPONENT -------------------- */
+
 
 export function VehicleFilters({ filters, setFilters }) {
 
@@ -59,7 +59,7 @@ export function VehicleFilters({ filters, setFilters }) {
         ? CAR_CATEGORIES
         : [...CAR_CATEGORIES, ...BIKE_CATEGORIES];
 
-  const activeFilterCount = Object.values(filters).filter(value => value !== 'all' && value !== 0 && value !== MAX_PRICE).length - 1; // Adjust for distance default
+  const activeFilterCount = Object.values(filters).filter(value => value !== 'all' && value !== 0 && value !== MAX_PRICE).length - 1;
 
   const clearFilters = () => {
     setFilters({
@@ -95,7 +95,7 @@ export function VehicleFilters({ filters, setFilters }) {
         )}
       </div>
 
-      {/* SEARCH */}
+
       <div className="space-y-2">
         <label className="text-sm font-medium text-muted-foreground">Search</label>
         <div className="relative group">
@@ -111,7 +111,7 @@ export function VehicleFilters({ filters, setFilters }) {
         </div>
       </div>
 
-      {/* TYPE */}
+
       <div className="space-y-3">
         <label className="text-sm font-medium text-muted-foreground">Vehicle Type</label>
         <div className="grid grid-cols-3 gap-2">
@@ -138,7 +138,7 @@ export function VehicleFilters({ filters, setFilters }) {
         </div>
       </div>
 
-      {/* CATEGORY */}
+
       <div className="space-y-2">
         <label className="text-sm font-medium text-muted-foreground">Category</label>
         <select
@@ -155,7 +155,7 @@ export function VehicleFilters({ filters, setFilters }) {
         </select>
       </div>
 
-      {/* BRAND */}
+
       <div className="space-y-2">
         <label className="text-sm font-medium text-muted-foreground">Brand</label>
         <select
@@ -172,7 +172,7 @@ export function VehicleFilters({ filters, setFilters }) {
         </select>
       </div>
 
-      {/* TRANSMISSION */}
+
       <div className="space-y-3">
         <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
           <Settings className="h-3 w-3" /> Transmission
@@ -196,7 +196,7 @@ export function VehicleFilters({ filters, setFilters }) {
         </div>
       </div>
 
-      {/* FUEL TYPE */}
+
       <div className="space-y-3">
         <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
           <Zap className="h-3 w-3" /> Fuel Type
@@ -220,7 +220,7 @@ export function VehicleFilters({ filters, setFilters }) {
         </div>
       </div>
 
-      {/* PRICE RANGE */}
+
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <label className="text-sm font-medium text-muted-foreground">Max Price / Day</label>
@@ -236,7 +236,7 @@ export function VehicleFilters({ filters, setFilters }) {
         />
       </div>
 
-      {/* SEATING (Cars only) */}
+
       {filters.type !== 'bike' && (
         <div className="space-y-3">
           <label className="text-sm font-medium text-muted-foreground">Seating Capacity</label>
@@ -260,7 +260,7 @@ export function VehicleFilters({ filters, setFilters }) {
         </div>
       )}
 
-      {/* MIN RATING */}
+
       <div className="space-y-3">
         <label className="text-sm font-medium text-muted-foreground">Minimum Rating</label>
         <div className="flex gap-2">
@@ -282,7 +282,7 @@ export function VehicleFilters({ filters, setFilters }) {
         </div>
       </div>
 
-      {/* DISTANCE */}
+
       <div className="space-y-4 pt-2 border-t border-white/5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

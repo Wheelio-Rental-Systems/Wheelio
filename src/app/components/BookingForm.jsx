@@ -25,28 +25,24 @@ const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
         total: 0
     });
 
-    // Helper to check for weekend (Fri, Sat, Sun)
     const isWeekend = (date) => {
         const day = date.getDay();
         return day === 0 || day === 5 || day === 6;
     };
 
-    // Calculate costs whenever dates or addon props change
     useEffect(() => {
         if (formData.startDate && formData.endDate) {
             const start = new Date(formData.startDate);
             const end = new Date(formData.endDate);
             const diffTime = Math.abs(end - start);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1; // Minimum 1 day
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
 
             const days = diffDays > 0 ? diffDays : 1;
             const rentalCost = days * vehicle.price;
 
-            // Calculate Add-ons cost
             const addOnsTotalPerDay = bookingData?.addOns?.reduce((acc, curr) => acc + curr.price, 0) || 0;
             const addOnsCost = addOnsTotalPerDay * days;
 
-            // Calculate Pricing Adjustments
             let pricingRules = [];
             try {
                 pricingRules = JSON.parse(localStorage.getItem('pricingRules') || '[]');
@@ -62,7 +58,6 @@ const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
                 let applyRule = false;
 
                 if (rule.condition === 'weekend') {
-                    // Check if any day in the range is a weekend
                     let current = new Date(start);
                     while (current <= end) {
                         if (isWeekend(current)) {
@@ -77,7 +72,7 @@ const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                     if (diffDays >= 30) applyRule = true;
                 } else if (rule.condition === 'holiday') {
-                    // Placeholder for holiday logic
+
                 }
 
                 if (applyRule) {
@@ -125,7 +120,6 @@ const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-                {/* Summary Card */}
                 <div className="bg-card rounded-3xl p-6 border border-white/5 h-fit order-2 lg:order-1">
                     <img
                         src={vehicle.image}
@@ -141,7 +135,6 @@ const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
                             <span className="text-white font-medium">₹{vehicle.price}</span>
                         </div>
 
-                        {/* Add-ons List */}
                         {bookingData.addOns?.length > 0 && (
                             <div className="py-3 border-y border-white/5 space-y-2">
                                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Selected Add-ons</p>
@@ -170,7 +163,6 @@ const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
                                 <span className="text-white">₹{costBreakdown.addOnsCost}</span>
                             </div>
 
-                            {/* Adjustments Display */}
                             {costBreakdown.activeAdjustments && costBreakdown.activeAdjustments.map((adj, idx) => (
                                 <div key={idx} className="flex justify-between text-sm">
                                     <span className={adj.amount < 0 ? "text-green-400" : "text-yellow-400"}>
@@ -194,7 +186,6 @@ const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
                     </div>
                 </div>
 
-                {/* Booking Form */}
                 <div className="bg-secondary/30 rounded-3xl p-8 border border-white/5 order-1 lg:order-2">
                     <h3 className="text-2xl font-bold text-white mb-6">Final Details</h3>
 
@@ -246,7 +237,6 @@ const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
                             </div>
                         </div>
 
-                        {/* Pickup Location Display */}
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-300">Pickup Location</label>
                             <div className="relative">
@@ -261,7 +251,6 @@ const BookingForm = ({ vehicle, bookingData, onBack, onConfirm }) => {
                             <p className="text-xs text-gray-500">Pick up your vehicle from this location</p>
                         </div>
 
-                        {/* Drop Fields */}
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-300">Drop Location</label>

@@ -14,6 +14,52 @@ const ExtendTripDialog = ({ isOpen, onClose, onConfirm, currentEndDate }) => {
         cvv: ''
     });
 
+    // Payment Formatters
+    const formatCardNumber = (value) => {
+        const v = value.replace(/\s+/g, '').replace(/[^0-9]/g, '');
+        const parts = [];
+        for (let i = 0; i < v.length; i += 4) {
+            parts.push(v.substring(i, i + 4));
+        }
+        return parts.length > 1 ? parts.join(' ') : value;
+    };
+
+    const formatExpiry = (value) => {
+        const v = value.replace(/[^0-9]/g, '');
+        if (v.length >= 2) {
+            return `${v.substring(0, 2)}/${v.substring(2, 4)}`;
+        }
+        return v;
+    };
+
+    const handleCardNumberChange = (e) => {
+        const val = e.target.value;
+        // Allow deletion
+        if (val.length < cardDetails.number.length) {
+            setCardDetails({ ...cardDetails, number: val });
+            return;
+        }
+        const formatted = formatCardNumber(val);
+        if (formatted.length <= 19) {
+            setCardDetails({ ...cardDetails, number: formatted });
+        }
+    };
+
+    const handleExpiryChange = (e) => {
+        const val = e.target.value;
+        const formatted = formatExpiry(val);
+        if (formatted.length <= 5) {
+            setCardDetails({ ...cardDetails, expiry: formatted });
+        }
+    };
+
+    const handleCVVChange = (e) => {
+        const val = e.target.value.replace(/\D/g, '');
+        if (val.length <= 4) {
+            setCardDetails({ ...cardDetails, cvv: val });
+        }
+    };
+
     if (!isOpen) return null;
 
     const costPerDay = 1500; // Mock cost - ideally passed from parent
@@ -138,7 +184,8 @@ const ExtendTripDialog = ({ isOpen, onClose, onConfirm, currentEndDate }) => {
                             required
                             placeholder="0000 0000 0000 0000"
                             value={cardDetails.number}
-                            onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
+                            onChange={handleCardNumberChange}
+                            maxLength={19}
                             className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-primary outline-none font-mono"
                         />
                     </div>
@@ -152,7 +199,8 @@ const ExtendTripDialog = ({ isOpen, onClose, onConfirm, currentEndDate }) => {
                             required
                             placeholder="MM/YY"
                             value={cardDetails.expiry}
-                            onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
+                            onChange={handleExpiryChange}
+                            maxLength={5}
                             className="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-primary outline-none font-mono text-center"
                         />
                     </div>
@@ -163,7 +211,8 @@ const ExtendTripDialog = ({ isOpen, onClose, onConfirm, currentEndDate }) => {
                             required
                             placeholder="123"
                             value={cardDetails.cvv}
-                            onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
+                            onChange={handleCVVChange}
+                            maxLength={4}
                             className="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-primary outline-none font-mono text-center"
                         />
                     </div>
@@ -174,7 +223,7 @@ const ExtendTripDialog = ({ isOpen, onClose, onConfirm, currentEndDate }) => {
                     <input
                         type="text"
                         required
-                        placeholder="John Doe"
+                        placeholder="Cardholder Name"
                         value={cardDetails.name}
                         onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
                         className="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-primary outline-none"

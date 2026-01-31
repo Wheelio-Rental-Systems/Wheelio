@@ -14,8 +14,8 @@ export function AdminPanel() {
     id: v.id,
     name: v.name,
     status: v.status,
-    revenue: Math.floor(v.pricePerDay * (Math.random() * 10 + 5)), // Mock generated revenue
-    utilization: Math.floor(Math.random() * 30 + 70) // Mock utilization 70-100%
+    revenue: Math.floor(v.pricePerDay * (Math.random() * 10 + 5)),
+    utilization: Math.floor(Math.random() * 30 + 70)
   }));
 
   const totalRevenue = vehicles.reduce((acc, v) => acc + v.revenue, 0);
@@ -27,8 +27,9 @@ export function AdminPanel() {
     { month: 'Feb', revenue: 52000 },
     { month: 'Mar', revenue: 48000 },
     { month: 'Apr', revenue: 61000 },
+    { month: 'Apr', revenue: 61000 },
     { month: 'May', revenue: 55000 },
-    { month: 'Jun', revenue: totalRevenue }, // Update current month
+    { month: 'Jun', revenue: totalRevenue },
   ];
 
   const utilizationData = [
@@ -44,12 +45,11 @@ export function AdminPanel() {
     switch (status) {
       case 'available':
         return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
-      case 'rented': // map 'active' or 'rented' if needed, assuming 'unavailable' might map here in future
+      case 'rented':
         return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
       case 'maintenance':
         return 'bg-destructive/10 text-destructive border-destructive/20';
       default:
-        // Handle 'unavailable' as rented for admin view if needed
         return status === 'unavailable'
           ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
           : 'bg-secondary text-muted-foreground border-border/50';
@@ -77,7 +77,7 @@ export function AdminPanel() {
         {[
           { label: 'Total Revenue', value: `$${totalRevenue.toLocaleString()}`, change: '+12.5%', icon: DollarSign, color: 'text-primary' },
           { label: 'Total Vehicles', value: vehicles.length.toString(), sub: `${activeVehicles} Active`, icon: Car, color: 'text-accent' },
-          { label: 'Active Users', value: '1,284', change: '+8.2%', icon: Users, color: 'text-cyan-500' }, // Mock users for now
+          { label: 'Active Users', value: '1,284', change: '+8.2%', icon: Users, color: 'text-cyan-500' },
           { label: 'Utilization', value: `${avgUtilization}%`, change: '+5.1%', icon: TrendingUp, color: 'text-emerald-500' },
         ].map((stat) => (
           <Card key={stat.label} className="border-white/5 bg-card/40 backdrop-blur hover:border-primary/20 transition-all">

@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, Calendar, ClipboardCheck, Tag, Plus, CheckCircle, XCircle, Settings, Camera, Clock, User, Car } from 'lucide-react';
 import CancelRideDialog from './CancelRideDialog';
-import ExtendTripDialog from './ExtendTripDialog';
 
-const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVehicle, vehicles = [], bookings = [] }) => {
-    // Analytics Calculation
-    const totalRevenue = bookings.reduce((sum, booking) => {
+
+const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVehicle, vehicles = [], bookings: initialBookings = [] }) => {
+    const [bookingList, setBookingList] = useState(initialBookings);
+
+    // Update local state when props change
+    useEffect(() => {
+        setBookingList(initialBookings);
+    }, [initialBookings]);
+
+    const totalRevenue = bookingList.reduce((sum, booking) => {
         const cost = parseInt(booking.cost.replace(/[^0-9]/g, '') || 0);
         return sum + cost;
     }, 0);
 
-    const activeBookingsCount = bookings.filter(b => b.status === 'Active' || b.status === 'Ongoing').length;
-    // Utilization Rate removed as per request
+    const activeBookingsCount = bookingList.filter(b => b.status === 'Active' || b.status === 'Ongoing').length;
 
     const vehicleStatusCounts = {
         Available: vehicles.filter(v => v.status === 'available').length,
@@ -19,15 +24,14 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
         Maintenance: vehicles.filter(v => v.status === 'maintenance').length
     };
 
-    // New Vehicle Form State
-    const [editMode, setEditMode] = useState(false); // Track if editing
-    const [editingId, setEditingId] = useState(null); // Track ID being edited
+    const [editMode, setEditMode] = useState(false);
+    const [editingId, setEditingId] = useState(null);
 
     const [newVehicle, setNewVehicle] = useState({
         name: '', brand: '', type: 'Car', price: '', location: '', rating: '4.5',
         details: { mileage: '', engine: '', power: '', topSpeed: '', fuelTank: '' },
         features: '', description: '',
-        images: ['', '', '', ''] // 4 Image URLs
+        images: ['', '', '', '']
     });
 
     const handleVehicleSubmit = (e) => {
@@ -37,7 +41,7 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
             price: parseInt(newVehicle.price),
             rating: parseFloat(newVehicle.rating),
             features: typeof newVehicle.features === 'string' ? newVehicle.features.split(',').map(f => f.trim()) : newVehicle.features,
-            image: newVehicle.images[0] || '/images/swift.jpeg', // Default or first image
+            image: newVehicle.images[0] || '/images/swift.jpeg',
             reviews: newVehicle.reviews || 0,
             status: newVehicle.status || 'available',
             seats: newVehicle.seats || 5,
@@ -89,21 +93,14 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
         });
     };
 
-    // Bookings State (Now recieved as prop, but keeping local if needed for filtering, though direct prop usage is better for analytics)
-    // We will use the 'bookings' prop for analytics.
-    // For the list display below, we can still use the prop.
+    const [activeTab, setActiveTab] = useState('overview');
 
-    const [activeTab, setActiveTab] = useState('overview'); // Changed default to overview
-
-    // Host Requests State
     const [hostRequests, setHostRequests] = useState([]);
 
-    // Damage Reports State
     const [damageReports, setDamageReports] = useState([]);
-    const [costInputs, setCostInputs] = useState({}); // Stores cost input for each report ID
+    const [costInputs, setCostInputs] = useState({});
 
     useEffect(() => {
-        // Load additional data if needed
         const storedRequests = JSON.parse(localStorage.getItem('hostRequests') || '[]');
         setHostRequests(storedRequests);
 
@@ -114,11 +111,8 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
     const handleConfirmCancel = (data) => {
         if (!selectedBooking) return;
 
-        const updatedBookings = bookings.map(b =>
-            b.id === selectedBooking ? { ...b, status: 'Cancelled' } : b
-        );
-
-        setBookings(updatedBookings);
+        const updatedBookings = bookingList.filter(b => b.id !== selectedBooking);
+        setBookingList(updatedBookings);
         localStorage.setItem('allBookings', JSON.stringify(updatedBookings));
         setIsCancelOpen(false);
         setSelectedBooking(null);
@@ -159,7 +153,6 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
         });
     };
 
-    // TASKS: Pricing Rules Data (Mock)
     const [pricingRules, setPricingRules] = useState(() => {
         const saved = localStorage.getItem('pricingRules');
         return saved ? JSON.parse(saved) : [
@@ -180,11 +173,7 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
     };
 
     const updateInspectionStatus = (id, newStatus) => {
-        // Assuming inspections state exists, if not, this function is unused.
-        // For now, it's a placeholder.
-        // setInspections(prev => prev.map(insp =>
-        //     insp.id === id ? { ...insp, status: newStatus } : insp
-        // ));
+
     };
 
     const addNewRule = () => {
@@ -206,29 +195,16 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
         { id: 'requests', label: 'Host Requests', icon: User },
     ];
 
-    // Dialog States
     const [isCancelOpen, setIsCancelOpen] = useState(false);
-    const [isExtendOpen, setIsExtendOpen] = useState(false);
+
+
+
+
     const [selectedBooking, setSelectedBooking] = useState(null);
 
     const handleCancelClick = (bookingId) => {
         setSelectedBooking(bookingId);
         setIsCancelOpen(true);
-    };
-
-    const handleExtendClick = (booking) => {
-        setSelectedBooking(booking);
-        setIsExtendOpen(true);
-    };
-
-
-
-    const handleConfirmExtend = (data) => {
-        console.log("Admin Extended Trip:", data);
-        // Implement extension logic here
-        setIsExtendOpen(false);
-        setSelectedBooking(null);
-        alert('Booking extension logic would be handled by parent component.');
     };
 
     return (
@@ -247,7 +223,6 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
                     </button>
                 </div>
 
-                {/* Tab Navigation */}
                 <div className="flex flex-wrap gap-2 md:gap-4 p-1 bg-secondary/30 backdrop-blur-md rounded-2xl border border-white/10 mb-8 max-w-fit">
                     {menuItems.map(item => (
                         <button
@@ -261,14 +236,11 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
                     ))}
                 </div>
 
-                {/* Content Area */}
                 <div className="bg-secondary/20 backdrop-blur-xl border border-white/5 rounded-3xl p-6 md:p-8 min-h-[500px]">
 
-                    {/* OVERVIEW TAB (New Analytics) */}
                     {activeTab === 'overview' && (
                         <div className="space-y-6 animate-in slide-in-from-right duration-300">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {/* Revenue Card */}
                                 <div className="bg-[#1e1e2d] border border-white/5 rounded-2xl p-6 shadow-lg">
                                     <div className="flex items-center justify-between mb-4">
                                         <h3 className="text-gray-400 font-medium">Total Revenue</h3>
@@ -282,9 +254,7 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
                                     </p>
                                 </div>
 
-                                {/* Utilization Rate Card Removed */}
 
-                                {/* Fleet Status Card */}
                                 <div className="bg-[#1e1e2d] border border-white/5 rounded-2xl p-6 shadow-lg">
                                     <div className="flex items-center justify-between mb-4">
                                         <h3 className="text-gray-400 font-medium">Fleet Status</h3>
@@ -310,11 +280,10 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
                             </div>
 
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                {/* Recent Activity / Bookings Snippet */}
                                 <div className="bg-[#1e1e2d] border border-white/5 rounded-2xl p-6">
                                     <h3 className="text-lg font-bold text-white mb-4">Recent Bookings</h3>
                                     <div className="space-y-4">
-                                        {bookings.slice(0, 5).map((booking) => (
+                                        {bookingList.slice(0, 5).map((booking) => (
                                             <div key={booking.id} className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
@@ -331,7 +300,7 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
                                                 </div>
                                             </div>
                                         ))}
-                                        {bookings.length === 0 && <p className="text-gray-500 text-sm italic">No recent bookings to display.</p>}
+                                        {bookingList.length === 0 && <p className="text-gray-500 text-sm italic">No recent bookings to display.</p>}
                                     </div>
                                 </div>
                             </div>
@@ -343,10 +312,10 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
                         <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
                             <h3 className="text-xl font-bold text-white mb-4">Bookings Management</h3>
                             <div className="space-y-4">
-                                {bookings.length === 0 ? (
+                                {bookingList.length === 0 ? (
                                     <div className="text-gray-400 text-center py-10">No bookings found.</div>
                                 ) : (
-                                    bookings.map((booking) => (
+                                    bookingList.map((booking) => (
                                         <div key={booking.id} className={`bg-card/50 border border-white/5 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-all ${booking.status === 'Cancelled' ? 'opacity-50 grayscale' : 'hover:border-primary/20'}`}>
                                             <div>
                                                 <div className="flex items-center gap-3 mb-1">
@@ -372,7 +341,6 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
                                                 </div>
                                             </div>
 
-                                            {/* Actions */}
                                             {booking.status !== 'Cancelled' && (
                                                 <div className="flex items-center gap-2 mt-4 md:mt-0 border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-4">
                                                     <button
@@ -382,13 +350,7 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
                                                     >
                                                         <XCircle size={18} />
                                                     </button>
-                                                    <button
-                                                        onClick={() => handleExtendClick(booking)}
-                                                        className="p-2 bg-cyan-500/10 text-cyan-500 rounded-lg hover:bg-cyan-500/20 transition-colors"
-                                                        title="Extend Trip"
-                                                    >
-                                                        <Clock size={18} />
-                                                    </button>
+
                                                 </div>
                                             )}
                                         </div>
@@ -398,7 +360,6 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
                         </div>
                     )}
 
-                    {/* FLEET MANAGEMENT TAB */}
                     {activeTab === 'fleet' && (
                         <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
                             <div className="flex justify-between items-center mb-4">
@@ -541,7 +502,6 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
                                 </form>
                             </div>
 
-                            {/* Vehicle List */}
                             <div className="space-y-4">
                                 <h4 className="text-lg font-bold text-white mb-2">Current Fleet</h4>
                                 {(vehicles && vehicles.length > 0) ? (
@@ -592,12 +552,10 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
                         </div>
                     )}
 
-                    {/* INSPECTIONS TAB */}
                     {activeTab === 'inspections' && (
                         <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
                             <h3 className="text-xl font-bold text-white mb-4">Damage Reports & Inspections</h3>
 
-                            {/* NEW: User Damage Reports */}
                             <div className="space-y-4 mb-8">
                                 <h4 className="text-lg font-semibold text-gray-300 mb-2">User Reported Damages</h4>
                                 {damageReports.length === 0 ? (
@@ -670,7 +628,6 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
                         </div>
                     )}
 
-                    {/* PRICING TAB */}
                     {activeTab === 'pricing' && (
                         <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
                             <div className="flex justify-between items-center mb-6">
@@ -702,7 +659,6 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
                         </div>
                     )}
 
-                    {/* HOST REQUESTS TAB */}
                     {activeTab === 'requests' && (
                         <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
                             <h3 className="text-xl font-bold text-white mb-4">Vehicle Hosting Requests</h3>
@@ -780,19 +736,11 @@ const AdminDashboard = ({ onNavigate, onAddVehicle, onDeleteVehicle, onUpdateVeh
                 </div>
             </div>
 
-            {/* Dialogs */}
             <CancelRideDialog
                 isOpen={isCancelOpen}
                 onClose={() => setIsCancelOpen(false)}
                 onConfirm={handleConfirmCancel}
                 bookingId={selectedBooking}
-            />
-
-            <ExtendTripDialog
-                isOpen={isExtendOpen}
-                onClose={() => setIsExtendOpen(false)}
-                onConfirm={handleConfirmExtend}
-                currentEndDate={selectedBooking?.dates?.split(' to ')[1] || 'Unknown'}
             />
         </div >
     );

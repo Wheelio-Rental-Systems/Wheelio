@@ -11,10 +11,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 
-/* -------------------- UTILS -------------------- */
 const formatINR = (amount) => `₹${amount}`;
-
-/* -------------------- COMPONENT -------------------- */
 export function BookingDialog({ open, onOpenChange, vehicle }) {
   const [pickupDate, setPickupDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
@@ -38,12 +35,11 @@ export function BookingDialog({ open, onOpenChange, vehicle }) {
 
   const duration = calculateDuration();
   const totalPrice = duration > 0 ? duration * vehicle.pricePerDay : vehicle.pricePerDay;
-  const days = duration; // Alias for UI consistency
+  const days = duration;
 
   /* -------------------- HANDLERS -------------------- */
   const handleBook = async () => {
     setIsLoading(true);
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
     setIsLoading(false);
     setIsSubmitted(true);
@@ -79,7 +75,6 @@ export function BookingDialog({ open, onOpenChange, vehicle }) {
     }, 1500);
   };
 
-  /* -------------------- UI -------------------- */
   return (
     <Dialog open={open} onOpenChange={resetAndClose}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto border-primary/20 bg-[#0f0f1a]/95 backdrop-blur-xl">
@@ -95,7 +90,6 @@ export function BookingDialog({ open, onOpenChange, vehicle }) {
             </DialogHeader>
 
             <form onSubmit={handleSubmit} className="space-y-6 mt-4">
-              {/* VEHICLE SUMMARY */}
               <div className="p-4 rounded-xl bg-secondary/30 border border-white/5 flex items-center gap-4">
                 <img
                   src={vehicle.image}
@@ -117,7 +111,6 @@ export function BookingDialog({ open, onOpenChange, vehicle }) {
                 </div>
               </div>
 
-              {/* DATES */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Pickup Date *</Label>
@@ -150,7 +143,6 @@ export function BookingDialog({ open, onOpenChange, vehicle }) {
                 </div>
               </div>
 
-              {/* LICENSE UPLOAD */}
               <div>
                 <Label>Driver’s License *</Label>
 
@@ -189,7 +181,6 @@ export function BookingDialog({ open, onOpenChange, vehicle }) {
                 )}
               </div>
 
-              {/* PRICE SUMMARY */}
               {days > 0 && (
                 <div className="p-4 rounded-lg bg-muted/40 border space-y-2">
                   <div className="flex justify-between text-sm">
@@ -207,7 +198,6 @@ export function BookingDialog({ open, onOpenChange, vehicle }) {
                 </div>
               )}
 
-              {/* INFO */}
               <div className="p-4 rounded-lg bg-muted/40 border text-sm text-muted-foreground">
                 <p className="flex items-center gap-2 font-medium text-foreground">
                   <CreditCard className="h-4 w-4" /> Important Information
@@ -219,7 +209,6 @@ export function BookingDialog({ open, onOpenChange, vehicle }) {
                 </ul>
               </div>
 
-              {/* ACTIONS */}
               <div className="flex gap-3">
                 <Button type="button" variant="outline" onClick={resetAndClose}>
                   Cancel
@@ -234,7 +223,6 @@ export function BookingDialog({ open, onOpenChange, vehicle }) {
             </form>
           </>
         ) : (
-          /* CONFIRMATION */
           <div className="text-center py-8 space-y-4">
             <CheckCircle className="h-14 w-14 text-green-500 mx-auto" />
             <h2 className="text-2xl font-semibold">Booking Confirmed</h2>

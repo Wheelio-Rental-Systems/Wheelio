@@ -2,37 +2,21 @@ import React, { useState } from 'react';
 import { X, AlertTriangle, CheckCircle } from 'lucide-react';
 
 const CancelRideDialog = ({ isOpen, onClose, onConfirm, bookingId }) => {
-    const [reason, setReason] = useState('');
-    const [selectedReason, setSelectedReason] = useState('');
-    const [step, setStep] = useState(1); // 1: Reason, 2: Confirmation
-
     if (!isOpen) return null;
 
-    const commonReasons = [
-        "Change of plans",
-        "Found a better option",
-        "Booked by mistake",
-        "Dates changed",
-        "Other"
-    ];
+    const [isConfirmed, setIsConfirmed] = useState(false);
 
-    const handleSubmit = () => {
-        if (!selectedReason) {
-            alert("Please select a reason");
-            return;
-        }
-        onConfirm({
-            bookingId,
-            reason: selectedReason === 'Other' ? reason : selectedReason,
-            timestamp: new Date().toISOString()
-        });
-        setStep(2);
+    const handleConfirm = () => {
+        setIsConfirmed(true);
+        // Simulate API call delay
         setTimeout(() => {
-            onClose();
-            setStep(1);
-            setReason('');
-            setSelectedReason('');
-        }, 2000);
+            onConfirm({
+                bookingId,
+                reason: 'Admin cancelled',
+                timestamp: new Date().toISOString()
+            });
+            setIsConfirmed(false);
+        }, 1000);
     };
 
     return (
@@ -45,7 +29,7 @@ const CancelRideDialog = ({ isOpen, onClose, onConfirm, bookingId }) => {
                     <X size={20} />
                 </button>
 
-                {step === 1 ? (
+                {!isConfirmed ? (
                     <div className="space-y-6">
                         <div className="text-center">
                             <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -57,36 +41,6 @@ const CancelRideDialog = ({ isOpen, onClose, onConfirm, bookingId }) => {
                             </p>
                         </div>
 
-                        <div className="space-y-3">
-                            <label className="text-sm font-medium text-gray-300">Reason for cancellation</label>
-                            <div className="space-y-2">
-                                {commonReasons.map((r) => (
-                                    <button
-                                        key={r}
-                                        onClick={() => setSelectedReason(r)}
-                                        className={`w-full text-left px-4 py-3 rounded-xl border transition-all ${selectedReason === r
-                                                ? 'bg-red-500/10 border-red-500 text-white'
-                                                : 'bg-black/20 border-white/5 text-gray-400 hover:bg-black/30'
-                                            }`}
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <span>{r}</span>
-                                            {selectedReason === r && <CheckCircle size={16} className="text-red-500" />}
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {selectedReason === 'Other' && (
-                            <textarea
-                                value={reason}
-                                onChange={(e) => setReason(e.target.value)}
-                                placeholder="Please tell us more..."
-                                className="w-full bg-black/20 border border-white/10 rounded-xl p-4 text-white placeholder-gray-500 focus:border-red-500 outline-none resize-none h-24"
-                            />
-                        )}
-
                         <div className="flex gap-3 pt-2">
                             <button
                                 onClick={onClose}
@@ -95,9 +49,8 @@ const CancelRideDialog = ({ isOpen, onClose, onConfirm, bookingId }) => {
                                 Keep Ride
                             </button>
                             <button
-                                onClick={handleSubmit}
-                                disabled={!selectedReason || (selectedReason === 'Other' && !reason)}
-                                className="flex-1 px-4 py-3 rounded-xl bg-red-500 text-white hover:bg-red-600 font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-red-500/20"
+                                onClick={handleConfirm}
+                                className="flex-1 px-4 py-3 rounded-xl bg-red-500 text-white hover:bg-red-600 font-bold transition-colors shadow-lg shadow-red-500/20"
                             >
                                 Confirm Cancel
                             </button>
@@ -108,8 +61,8 @@ const CancelRideDialog = ({ isOpen, onClose, onConfirm, bookingId }) => {
                         <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4 animate-in zoom-in duration-300">
                             <CheckCircle size={40} className="text-green-500" />
                         </div>
-                        <h3 className="text-2xl font-bold text-white">Ride Cancelled</h3>
-                        <p className="text-gray-400">Your booking has been successfully cancelled.</p>
+                        <h3 className="text-2xl font-bold text-white">Cancelling...</h3>
+                        <p className="text-gray-400">Processing cancellation request.</p>
                     </div>
                 )}
             </div>

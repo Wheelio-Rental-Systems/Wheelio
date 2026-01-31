@@ -5,7 +5,6 @@ import { Filter } from 'lucide-react';
 import { VehicleDetailsDialog } from './VehicleDetailsDialog';
 
 const VehicleList = ({ onBook, user, vehicles = [] }) => {
-    // State for advanced filters
     const [filters, setFilters] = useState({
         type: 'all',
         brand: 'all',
@@ -16,23 +15,18 @@ const VehicleList = ({ onBook, user, vehicles = [] }) => {
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
 
-    // Extract unique values for dropdowns and sort them alphabetically
     const brands = ['all', ...Array.from(new Set(vehicles.map(v => v.brand))).sort()];
     const locations = ['all', ...Array.from(new Set(vehicles.map(v => v.location))).sort()];
     const types = ['all', 'Bike', 'Car', 'Scooter', 'Sedan', 'SUV'];
 
     const filteredVehicles = vehicles.filter(v => {
-        // Type Filter (Handle "Cars" grouping)
         const typeMatch = filters.type === 'all' ||
             (filters.type === 'Car' ? ['Hatchback', 'Sedan', 'SUV', 'MPV'].includes(v.type) : v.type === filters.type);
 
-        // Brand Filter
         const brandMatch = filters.brand === 'all' || v.brand === filters.brand;
 
-        // Location Filter
         const locationMatch = filters.location === 'all' || v.location === filters.location;
 
-        // Rating Filter
         const ratingMatch = filters.rating === 'all' || v.rating >= parseFloat(filters.rating);
 
         return typeMatch && brandMatch && locationMatch && ratingMatch;
@@ -62,7 +56,6 @@ const VehicleList = ({ onBook, user, vehicles = [] }) => {
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
-            {/* Header & Filters */}
             <div className="flex flex-col mb-12 gap-8">
                 <div>
                     <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
@@ -71,10 +64,8 @@ const VehicleList = ({ onBook, user, vehicles = [] }) => {
                     <p className="text-gray-400 text-lg">Explore our collection of premium vehicles for your next adventure</p>
                 </div>
 
-                {/* Advanced Filter Bar */}
                 <div className="bg-secondary/30 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex flex-wrap gap-4 items-center">
 
-                    {/* Type Filter */}
                     <div className="flex items-center gap-2 bg-black/40 px-4 py-2 rounded-xl border border-white/5">
                         <Filter size={16} className="text-primary" />
                         <select
@@ -90,7 +81,6 @@ const VehicleList = ({ onBook, user, vehicles = [] }) => {
                         </select>
                     </div>
 
-                    {/* Brand Filter */}
                     <div className="flex items-center gap-2 bg-black/40 px-4 py-2 rounded-xl border border-white/5">
                         <span className="text-gray-400 text-sm">Brand:</span>
                         <select
@@ -105,7 +95,6 @@ const VehicleList = ({ onBook, user, vehicles = [] }) => {
                         </select>
                     </div>
 
-                    {/* Location Filter */}
                     <div className="flex items-center gap-2 bg-black/40 px-4 py-2 rounded-xl border border-white/5">
                         <span className="text-gray-400 text-sm">Location:</span>
                         <select
@@ -120,7 +109,6 @@ const VehicleList = ({ onBook, user, vehicles = [] }) => {
                         </select>
                     </div>
 
-                    {/* Rating Filter */}
                     <div className="flex items-center gap-2 bg-black/40 px-4 py-2 rounded-xl border border-white/5">
                         <span className="text-gray-400 text-sm">Rating:</span>
                         <select
@@ -134,7 +122,6 @@ const VehicleList = ({ onBook, user, vehicles = [] }) => {
                         </select>
                     </div>
 
-                    {/* Clear Filters Button */}
                     <button
                         onClick={() => setFilters({ type: 'all', brand: 'all', location: 'all', rating: 'all' })}
                         className="ml-auto text-sm text-red-400 hover:text-red-300 font-medium transition-colors"
@@ -144,7 +131,6 @@ const VehicleList = ({ onBook, user, vehicles = [] }) => {
                 </div>
             </div>
 
-            {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredVehicles.map((vehicle) => (
                     <VehicleCard

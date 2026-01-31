@@ -34,10 +34,9 @@ import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
 
 export function SupportDialog({ open, onOpenChange, defaultTab = "emergency", user }) {
-    const [activeTab, setActiveTab] = useState("emergency"); // Default to emergency/damage
+    const [activeTab, setActiveTab] = useState("emergency");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Damage Report State
     const [damageForm, setDamageForm] = useState({
         location: '',
         severity: 'minor',
@@ -47,7 +46,6 @@ export function SupportDialog({ open, onOpenChange, defaultTab = "emergency", us
 
     const handleFileChange = (e) => {
         if (e.target.files && e.target.files.length > 0) {
-            // Convert to Base64 for local storage demo
             const files = Array.from(e.target.files);
             Promise.all(files.map(file => {
                 return new Promise((resolve, reject) => {
@@ -86,7 +84,7 @@ export function SupportDialog({ open, onOpenChange, defaultTab = "emergency", us
             userId: user.email || 'unknown',
             userName: user.name || 'User',
             ...damageForm,
-            status: 'Pending', // Pending, Reviewed, Cost Estimated
+            status: 'Pending',
             estimatedCost: 0,
             submittedAt: new Date().toISOString()
         };
@@ -143,7 +141,8 @@ export function SupportDialog({ open, onOpenChange, defaultTab = "emergency", us
                             </TabsTrigger>
                         </TabsList>
 
-                        {/* DAMAGE REPORT TAB */}
+
+
                         <TabsContent value="damage" className="space-y-4">
                             {!user ? (
                                 <div className="text-center py-10 space-y-4">
@@ -248,7 +247,8 @@ export function SupportDialog({ open, onOpenChange, defaultTab = "emergency", us
                             )}
                         </TabsContent>
 
-                        {/* EMERGENCY CONTACTS TAB */}
+
+
                         <TabsContent value="emergency" className="space-y-6 animate-in fade-in slide-in-from-right">
                             <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex gap-4">
                                 <AlertTriangle className="h-6 w-6 text-destructive shrink-0 mt-1" />
@@ -289,7 +289,7 @@ export function SupportDialog({ open, onOpenChange, defaultTab = "emergency", us
                         </TabsContent>
                     </Tabs>
                 </div>
-            </DialogContent>
-        </Dialog>
+            </DialogContent >
+        </Dialog >
     );
 }

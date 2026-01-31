@@ -3,33 +3,31 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Features from './components/Features';
 import VehicleList from './components/VehicleList';
-import BookingWizard from './components/BookingWizard'; // Updated import
+import BookingWizard from './components/BookingWizard';
 import Footer from './components/Footer';
 import { About, Testimonials, Careers, HelpCenter, Terms, Privacy, Contact } from './components/FooterPages';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
-import { DamageReport } from './components/DamageReport'; // New import
-import { EmergencyButton } from './components/EmergencyButton'; // New import
-import { SupportDialog } from './components/SupportDialog'; // New import
-import HostVehicleForm from './components/HostVehicleForm'; // New import
-import AdminLogin from './components/AdminLogin'; // New import
-import AdminDashboard from './components/AdminDashboard'; // New import
-import { Toaster, toast } from 'sonner'; // Ensure sonner is installed or handle if missing
-import { vehicles as staticVehicles } from './data/vehicles'; // Import static vehicles
+import { DamageReport } from './components/DamageReport';
+import { EmergencyButton } from './components/EmergencyButton';
+import { SupportDialog } from './components/SupportDialog';
+import HostVehicleForm from './components/HostVehicleForm';
+
+import AdminDashboard from './components/AdminDashboard';
+import { Toaster, toast } from 'sonner';
+import { vehicles as staticVehicles } from './data/vehicles';
 
 const App = () => {
   // State for Navigation
   const [currentView, setCurrentView] = useState('home');
   const [selectedVehicle, setSelectedVehicle] = useState(null);
-  const [userBookings, setUserBookings] = useState([]); // Store bookings here
-  const [allBookings, setAllBookings] = useState([]); // Global bookings state for Admin
-  const [user, setUser] = useState(null); // Initial state is logged out
+  const [userBookings, setUserBookings] = useState([]);
+  const [allBookings, setAllBookings] = useState([]);
+  const [user, setUser] = useState(null);
 
-  // Vehicle State (Lifted from VehicleList)
   const [allVehicles, setAllVehicles] = useState([]);
 
   useEffect(() => {
-    // Initialize vehicles from localStorage or static data
     const storedVehicles = JSON.parse(localStorage.getItem('allVehicles'));
     if (storedVehicles && storedVehicles.length > 0) {
       setAllVehicles(storedVehicles);
@@ -38,12 +36,8 @@ const App = () => {
       localStorage.setItem('allVehicles', JSON.stringify(staticVehicles));
     }
 
-    // Initialize bookings from localStorage
     const storedBookings = JSON.parse(localStorage.getItem('allBookings') || '[]');
     setAllBookings(storedBookings);
-    // Note: userBookings might need to be filtered from allBookings based on logged in user in a real app
-    // For now we keep userBookings somewhat separate or we could sync them. 
-    // Let's rely on allBookings as the truth for Admin.
   }, []);
 
   const handleAddVehicle = (newVehicle) => {
@@ -68,20 +62,18 @@ const App = () => {
 
   const handleLogin = (userData) => {
     setUser(userData);
-    setCurrentView('home'); // Redirect to home or dashboard after login
+    setCurrentView('home');
   };
 
   const handleLogout = () => {
     setUser(null);
     setCurrentView('home');
-    setUserBookings([]); // Clear bookings on logout if needed
+    setUserBookings([]);
   };
 
-  // Support & Dialog States
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [supportTab, setSupportTab] = useState('faq');
 
-  // Handle flow
   const handleNavigate = (view) => {
     setCurrentView(view);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -94,38 +86,34 @@ const App = () => {
   };
 
   const confirmBooking = (bookingData) => {
-    // Save the new booking
     const newBooking = {
       ...bookingData,
       id: Date.now(),
       date: new Date().toLocaleDateString(),
       status: 'Upcoming',
-      cost: '₹' + (bookingData.vehicle.price * 1.05 + 96).toFixed(0), // Approximate cost calc from dialog
-      userName: user ? user.name : 'Guest User', // Add user name for Admin Dashboard
-      vehicleName: bookingData.vehicle.name // Ensure vehicle name is accessible
+      cost: '₹' + (bookingData.vehicle.price * 1.05 + 96).toFixed(0),
+      userName: user ? user.name : 'Guest User',
+      vehicleName: bookingData.vehicle.name
     };
 
     setUserBookings(prev => [newBooking, ...prev]);
 
-    // Sync with global state and localStorage for Admin Dashboard
     const updatedAllBookings = [newBooking, ...allBookings];
     setAllBookings(updatedAllBookings);
     localStorage.setItem('allBookings', JSON.stringify(updatedAllBookings));
 
     setSelectedVehicle(null);
-    handleNavigate('dashboard'); // Redirect to dashboard to see the booking
+    handleNavigate('dashboard');
   };
 
   const handleUpdateBooking = (updatedBooking) => {
     setUserBookings(prev => prev.map(b =>
       b.id === updatedBooking.id ? { ...b, ...updatedBooking } : b
     ));
-    // Ideally toast notification here
   };
 
   const handleCancelBooking = (bookingId) => {
     setUserBookings(prev => prev.filter(b => b.id !== bookingId));
-    // Toast notification could be triggered here or in Dashboard
   };
 
   const handleEmergency = () => {
@@ -165,12 +153,10 @@ const App = () => {
           />
         )}
 
-        {/* New Route for Host Form */}
         {currentView === 'become-host' && (
           <HostVehicleForm onNavigate={handleNavigate} user={user} />
         )}
 
-        {/* New Route for Damage Report */}
         {currentView === 'damage-report' && (
           <DamageReport />
         )}
@@ -185,13 +171,11 @@ const App = () => {
         {currentView === 'login' && <Login onNavigate={handleNavigate} onLogin={handleLogin} />}
         {currentView === 'dashboard' && <Dashboard onNavigate={handleNavigate} bookings={userBookings} user={user} onUpdateUser={handleUpdateUser} onUpdateBooking={handleUpdateBooking} onCancelBooking={handleCancelBooking} />}
 
-        {/* Admin Routes */}
-        {currentView === 'admin-login' && <AdminLogin onNavigate={handleNavigate} onLogin={handleLogin} />}
+
         {currentView === 'admin-dashboard' && <AdminDashboard onNavigate={handleNavigate} vehicles={allVehicles} bookings={allBookings} onAddVehicle={handleAddVehicle} onDeleteVehicle={handleDeleteVehicle} onUpdateVehicle={handleUpdateVehicle} />}
 
       </main>
 
-      {/* Global Floating Components */}
       <EmergencyButton onClick={handleEmergency} />
 
       <SupportDialog

@@ -55,7 +55,6 @@ const AddOns = ({ onNext, onBack, vehicle }) => {
 
             <div className="space-y-4 mb-8">
                 {ADD_ONS.filter(addon => {
-                    // Filter logic: Pillion Helmet only for Bikes/Scooters
                     if (addon.id === 'helmet') {
                         return vehicle.type === 'Bike' || vehicle.type === 'Scooter';
                     }

@@ -9,27 +9,38 @@ const Login = ({ onNavigate, onLogin }) => {
     const [forgotPassMode, setForgotPassMode] = useState(false);
     const [resetLinkSent, setResetLinkSent] = useState(false);
     const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
         setIsLoading(true);
-        // Simulate auth API call
+
         setTimeout(() => {
             setIsLoading(false);
-            // Derive name from email for demo if not provided, or use a default
-            const nameFromEmail = email.split('@')[0];
 
-
-            const userData = {
-                name: nameFromEmail,
-                email: email,
-                avatar: null,
-                memberSince: 'Jan 2026',
-                licenseVerified: true
-            };
-
-            if (onLogin) onLogin(userData);
-            onNavigate('dashboard');
+            if (email === 'admin@wheelio.com' && password === 'admin123') {
+                const adminData = {
+                    name: 'Admin User',
+                    email: email,
+                    role: 'admin',
+                    avatar: null
+                };
+                if (onLogin) onLogin(adminData);
+                onNavigate('admin-dashboard');
+            } else {
+                // Regular User Login
+                const nameFromEmail = email.split('@')[0];
+                const userData = {
+                    name: nameFromEmail,
+                    email: email,
+                    role: 'user',
+                    avatar: null,
+                    memberSince: 'Jan 2026',
+                    licenseVerified: true
+                };
+                if (onLogin) onLogin(userData);
+                onNavigate('dashboard');
+            }
         }, 1500);
     };
 
@@ -196,6 +207,8 @@ const Login = ({ onNavigate, onLogin }) => {
                                     <input
                                         type="password"
                                         required
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
                                         className="w-full bg-black/40 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder-gray-600 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all"
                                         placeholder="••••••••"
                                     />
